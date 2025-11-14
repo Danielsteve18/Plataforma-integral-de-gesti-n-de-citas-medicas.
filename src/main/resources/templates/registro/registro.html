@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<title>Registro</title>
+	<link rel="stylesheet" th:href="@{/login/luz.css}" />
+	<link rel="stylesheet" th:href="@{/login/bordeE.css}" />
+	<link rel="stylesheet" th:href="@{/login/login.css}" />
+</head>
+<body class="light-rays">
+
+	<!-- Imagen gigante del Dr. Daniel como fondo -->
+	<img src="/components/danieldoctor.png" class="doctor-background" alt="Dr. Daniel" />
+	
+	<section class="auth-container">
+		<!-- Botón volver al inicio en esquina superior izquierda -->
+		<a href="/" class="back-home-btn">← Volver al inicio</a>
+		
+		<div class="auth-message">
+			<h2>¡Hola, nuevo usuario!</h2>
+			<p>Regístrate para comenzar a usar MediPac y gestionar tus citas médicas.</p>
+      <br>
+      <p>Ya tienes una cuenta?</p>
+			<a href="/login" class="auth-button ">Iniciar sesión</a>
+		</div>
+
+		<form th:action="@{/register}" method="post" class="auth-form">
+			<!-- CSRF Token para Spring Security -->
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			
+			<h2>Crear cuenta</h2>
+			
+			<!-- Mensajes de error y éxito -->
+			<div th:if="${error}" class="alert alert-error" style="color: #ff6b6b; background: rgba(255, 107, 107, 0.1); padding: 0.8rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid rgba(255, 107, 107, 0.3);">
+				<span th:text="${error}"></span>
+			</div>
+			<div th:if="${success}" class="alert alert-success" style="color: #51cf66; background: rgba(81, 207, 102, 0.1); padding: 0.8rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid rgba(81, 207, 102, 0.3);">
+				<span th:text="${success}"></span>
+			</div>
+			
+			<div class="form-group">
+				<label for="name">Nombre completo</label>
+				<input type="text" id="name" name="name" required />
+			</div>
+			<div class="form-group">
+				<label for="email">Correo electrónico</label>
+				<input type="email" id="email" name="email" required />
+			</div>
+			<div class="form-group">
+				<label for="username">Usuario</label>
+				<input type="text" id="username" name="username" required />
+			</div>
+			<div class="form-group">
+				<label for="password">Contraseña</label>
+				<input type="password" id="password" name="password" required />
+			</div>
+			<button type="submit" class="auth-submit">Registrarse</button>
+		</form>
+	</section>
+
+	<!-- Elemento opcional para efectos eléctricos -->
+	<!-- 
+		<div class="electric-border">
+			<div class="eb-content">Contenido con borde eléctrico</div>
+		</div>
+	-->
+	
+	<script type="module">
+		console.log('🚀 Iniciando efectos visuales...');
+		
+		try {
+			// Importar y aplicar efecto de rayos de luz
+			const { createLightRays } = await import('/login/luz.js');
+			console.log('✅ luz.js cargado correctamente');
+
+			const efectos = createLightRays({
+				selector: '.light-rays',
+				color: '#7bb3f0',           // Color azul suave
+				speed: 1.5,                 // Velocidad
+				intensity: 1.5,             // Intensidad aumentada
+				pulsating: true,            // ¿Pulsante?
+				spread: 1.2,                // Dispersión aumentada
+				length: 2.5                 // Longitud aumentada
+			});
+
+			console.log('✨ LightRays iniciado para', efectos ? efectos.length : 0, 'elementos');
+		} catch (error) {
+			console.error('❌ Error cargando luz.js:', error);
+		}
+		
+		try {
+			// Importar efecto de borde eléctrico (opcional)
+			const { createElectricBorder } = await import('/login/bordeElectric.js');
+			console.log('✅ bordeElectric.js cargado correctamente');
+
+			// Solo aplicar si existe el elemento
+			const electricElement = document.querySelector('.electric-border');
+			if (electricElement) {
+				createElectricBorder({
+					selector: '.electric-border',
+					color: '#7bb3f0',
+					speed: 1.5,
+					chaos: 1.2,
+					thickness: 3
+				});
+				console.log('⚡ Electric Border aplicado');
+			}
+		} catch (error) {
+			console.error('❌ Error cargando bordeElectric.js:', error);
+		}
+	</script>
+				
+
+				
+</body>
+</html>

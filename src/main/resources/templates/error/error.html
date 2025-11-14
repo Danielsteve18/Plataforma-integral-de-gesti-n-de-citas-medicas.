@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Error 404 - Página no encontrada</title>
+  <link rel="stylesheet" th:href="@{/error/error.css}" />
+  <link rel="stylesheet" th:href="@{/error/letterGlitch.css}" />
+</head>
+<body>
+  <!-- Fondo con efecto Letter Glitch -->
+  <div class="error-background letter-glitch" id="glitch-background"></div>
+  
+  <!-- Contenido del error con efecto fuzzy -->
+  <div class="error-content">
+    <canvas class="error-code-canvas" id="error-404"></canvas>
+    <canvas class="error-title-canvas" id="error-not-found"></canvas>
+    <div th:if="${customMessage}">
+      <p th:utext="${customMessage}"></p>
+    </div>
+    <div th:unless="${customMessage}">
+      <p>Parece que has desaparecido en el ciberespacio.</p>
+      <p>Pero no te preocupes, podemos ayudarte a encontrar el camino de vuelta.</p>
+    </div>
+    <button onclick="window.location.href='/'" style="
+      background-color: #61dca3;
+      color: #2b4539;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+    " onmouseover="this.style.backgroundColor='#4db88a'" onmouseout="this.style.backgroundColor='#61dca3'">
+      Volver al inicio
+    </button>
+  </div>
+
+  <script type="module">
+    console.log('🚀 Iniciando efectos de error...');
+    
+    try {
+      // Importar efectos
+      const { createLetterGlitch } = await import('/error/letterGlitch.js');
+      const { createFuzzyText } = await import('/error/fuzzyText.js');
+      
+      console.log('✅ Módulos cargados correctamente');
+
+      // Crear fondo Letter Glitch
+      const glitchInstances = createLetterGlitch({
+        selector: '#glitch-background',
+        glitchColors: ['#2b4539', '#61dca3', '#61b3dc'],
+        glitchSpeed: 50,
+        centerVignette: false,
+        outerVignette: true,
+        smooth: true,
+        characters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'
+      });
+
+      // Crear texto fuzzy "404"
+      const canvas404 = document.getElementById('error-404');
+      const fuzzy404 = createFuzzyText({
+        canvas: canvas404,
+        text: '404',
+        fontSize: 'clamp(4rem, 15vw, 12rem)',
+        fontWeight: 900,
+        color: '#fff',
+        baseIntensity: 0.18,
+        hoverIntensity: 0.5
+      });
+
+      // Crear texto fuzzy "not found"
+      const canvasNotFound = document.getElementById('error-not-found');
+      const fuzzyNotFound = createFuzzyText({
+        canvas: canvasNotFound,
+        text: 'not found',
+        fontSize: 'clamp(1.5rem, 8vw, 4rem)',
+        fontWeight: 700,
+        color: '#fff',
+        baseIntensity: 0.15,
+        hoverIntensity: 0.4
+      });
+
+      console.log('✨ Efectos iniciados:', {
+        glitch: glitchInstances.length,
+        fuzzy404: fuzzy404 ? 1 : 0,
+        fuzzyNotFound: fuzzyNotFound ? 1 : 0
+      });
+      
+    } catch (error) {
+      console.error('❌ Error cargando efectos:', error);
+      // Fallback: mostrar texto simple
+      document.body.innerHTML = `
+        <div style="color: white; text-align: center; font-family: monospace; z-index: 10; position: relative;">
+          <div style="font-size: 8rem; font-weight: 900; margin-bottom: 1rem;">404</div>
+          <div style="font-size: 2rem; font-weight: 700;">not found</div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

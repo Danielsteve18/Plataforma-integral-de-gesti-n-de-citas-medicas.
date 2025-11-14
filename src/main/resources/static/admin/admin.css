@@ -1,0 +1,826 @@
+/* Estilos para el Panel de Administración MediPac */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+/* Botón volver al inicio */
+.back-home-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1001;
+    padding: 10px 16px;
+    background: rgba(30, 100, 180, 0.9);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(30, 100, 180, 0.5);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(30, 100, 180, 0.3);
+}
+
+.back-home-btn:hover {
+    background: rgba(40, 120, 200, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(30, 100, 180, 0.4);
+}
+
+/* Header */
+.admin-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 60px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 20px;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.admin-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.admin-user {
+    font-weight: 500;
+}
+
+.logout-btn {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 280px;
+    height: calc(100vh - 60px);
+    background: white;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    overflow-y: auto;
+}
+
+.sidebar.collapsed {
+    transform: translateX(-100%);
+}
+
+.sidebar-content {
+    padding: 20px 0;
+}
+
+.sidebar-section {
+    margin-bottom: 10px;
+}
+
+.sidebar-item,
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    gap: 12px;
+}
+
+.sidebar-item:hover,
+.sidebar-header:hover {
+    background: rgba(30, 100, 180, 0.1);
+    color: #1e64b4;
+}
+
+.dashboard-item {
+    background: linear-gradient(90deg, rgba(30, 100, 180, 0.1), transparent);
+    border-right: 3px solid #1e64b4;
+    color: #1e64b4;
+}
+
+.sidebar-header {
+    font-weight: 600;
+    color: #555;
+    cursor: default;
+    justify-content: space-between;
+}
+
+.badge {
+    background: #1e64b4;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.sidebar-subitems {
+    margin-left: 20px;
+}
+
+.sidebar-subitem {
+    display: flex;
+    align-items: center;
+    padding: 8px 20px;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    gap: 10px;
+    font-size: 0.9rem;
+}
+
+.sidebar-subitem:hover {
+    background: rgba(30, 100, 180, 0.05);
+    color: #1e64b4;
+}
+
+.sidebar-subitem.active {
+    background: rgba(30, 100, 180, 0.1);
+    color: #1e64b4;
+    font-weight: 500;
+    border-right: 2px solid #1e64b4;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 15px 20px;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: 280px;
+    margin-top: 60px;
+    padding: 30px;
+    transition: margin-left 0.3s ease;
+    min-height: calc(100vh - 60px);
+}
+
+.main-content.expanded {
+    margin-left: 0;
+}
+
+.content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Dashboard Cards */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.dashboard-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.pacientes-card {
+    border-left-color: #4CAF50;
+}
+
+.doctores-card {
+    border-left-color: #2196F3;
+}
+
+.admins-card {
+    border-left-color: #FF9800;
+}
+
+.card-icon {
+    font-size: 3rem;
+    opacity: 0.8;
+}
+
+.pacientes-card .card-icon {
+    color: #4CAF50;
+}
+
+.doctores-card .card-icon {
+    color: #2196F3;
+}
+
+.admins-card .card-icon {
+    color: #FF9800;
+}
+
+.card-content h3 {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.card-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Section View */
+.section-header {
+    margin-bottom: 30px;
+}
+
+.section-header h2 {
+    color: #333;
+    font-size: 1.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-active {
+    color: #4CAF50;
+}
+
+.status-blocked {
+    color: #f44336;
+}
+
+/* Estilos para la tabla de usuarios */
+.users-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.users-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.users-table th {
+    background: linear-gradient(135deg, #1e64b4 0%, #2980b9 100%);
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.users-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.users-table tbody tr:hover {
+    background: #f8f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(30, 100, 180, 0.15);
+}
+
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Información de usuario */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    font-size: 1.5rem;
+    color: #1e64b4;
+}
+
+/* Badges de roles */
+.role-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-admin {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #0d47a1;
+    border: 1px solid #bbdefb;
+}
+
+.role-doctor {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    color: #4a148c;
+    border: 1px solid #e1bee7;
+}
+
+.role-paciente {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    color: #1b5e20;
+    border: 1px solid #c8e6c9;
+}
+
+.role-bloqueado {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    color: #b71c1c;
+    border: 1px solid #ffcdd2;
+}
+
+/* Contenedor de acciones */
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Dropdown para roles */
+.role-select {
+    padding: 6px 12px;
+    border: 2px solid #e0e6ed;
+    border-radius: 6px;
+    background: white;
+    color: #333;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 130px;
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: #1e64b4;
+    box-shadow: 0 0 0 3px rgba(30, 100, 180, 0.1);
+}
+
+.role-select:hover {
+    border-color: #1e64b4;
+}
+
+/* Botones de acción */
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    margin: 0 2px;
+    min-width: 80px;
+}
+
+.block-btn {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+.block-btn:hover {
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.unblock-btn {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+}
+
+.unblock-btn:hover {
+    background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+}
+
+/* Estados de usuario */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-blocked {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Estilos específicos para la sección de bloqueados */
+.blocked-section {
+    border-left: 3px solid #e74c3c !important;
+}
+
+.blocked-section:hover {
+    background: rgba(231, 76, 60, 0.1) !important;
+}
+
+.blocked-section.active {
+    background: rgba(231, 76, 60, 0.15) !important;
+    border-left: 4px solid #c0392b !important;
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+}
+
+/* Estilos para tabla de bloqueados */
+.section-content[data-seccion="bloqueados"] {
+    border-top: 3px solid #e74c3c;
+}
+
+.section-content[data-seccion="bloqueados"] h2 {
+    color: #c0392b;
+}
+
+.section-content[data-seccion="bloqueados"] .users-table th {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.section-content[data-seccion="bloqueados"] .users-table tbody tr:hover {
+    background: rgba(231, 76, 60, 0.05);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.15);
+}
+
+/* Notificaciones */
+.notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1002;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateX(100%);
+    transition: all 0.4s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.notification.error {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.notification.warning {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+}
+
+/* Filtros y búsqueda */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.search-box {
+    padding: 10px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 25px;
+    background: white;
+    color: #333;
+    font-size: 0.9rem;
+    min-width: 250px;
+    transition: all 0.3s ease;
+}
+
+.search-box:focus {
+    outline: none;
+    border-color: #1e64b4;
+    box-shadow: 0 0 0 3px rgba(30, 100, 180, 0.1);
+}
+
+.filter-dropdown {
+    padding: 10px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.filter-dropdown:focus {
+    outline: none;
+    border-color: #1e64b4;
+    box-shadow: 0 0 0 3px rgba(30, 100, 180, 0.1);
+}
+
+.section-content {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.placeholder-content {
+    text-align: center;
+    color: #666;
+    padding: 60px 20px;
+}
+
+.placeholder-content i {
+    font-size: 3rem;
+    color: #1e64b4;
+    margin-bottom: 20px;
+}
+
+.placeholder-content p {
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        transform: translateX(-100%);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 20px 15px;
+    }
+    
+    .back-home-btn {
+        top: 15px;
+        right: 15px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .admin-title {
+        font-size: 1.2rem;
+    }
+    
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .dashboard-card {
+        padding: 20px;
+    }
+    
+    .card-icon {
+        font-size: 2.5rem;
+    }
+    
+    .card-number {
+        font-size: 2rem;
+    }
+    
+    /* Tabla responsive */
+    .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .search-box,
+    .filter-dropdown {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .users-table table {
+        font-size: 0.8rem;
+    }
+    
+    .users-table th,
+    .users-table td {
+        padding: 8px 6px;
+    }
+    
+    .role-select {
+        min-width: 100px;
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+    
+    .action-btn {
+        min-width: 60px;
+        font-size: 0.7rem;
+        padding: 4px 8px;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        top: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-content {
+        padding: 0 15px;
+    }
+    
+    .admin-title {
+        font-size: 1rem;
+    }
+    
+    .admin-title i {
+        display: none;
+    }
+    
+    .section-content {
+        padding: 25px 15px;
+    }
+    
+    /* Tabla con scroll horizontal en móviles muy pequeños */
+    .users-table-container {
+        overflow-x: auto;
+    }
+    
+    .users-table table {
+        min-width: 600px;
+        font-size: 0.75rem;
+    }
+    
+    .users-table th,
+    .users-table td {
+        padding: 6px 4px;
+        white-space: nowrap;
+    }
+    
+    .role-select {
+        min-width: 80px;
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+    
+    .action-btn {
+        min-width: 50px;
+        font-size: 0.6rem;
+        padding: 3px 6px;
+    }
+    
+    .role-badge {
+        font-size: 0.6rem;
+        padding: 2px 8px;
+    }
+    
+    .user-actions {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
+/* Estilos para botones de refrescar */
+.refresh-btn,
+.refresh-section-btn {
+    transition: all 0.3s ease;
+}
+
+.refresh-btn:hover,
+.refresh-section-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+.refresh-btn:active,
+.refresh-section-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3) !important;
+}
+
+.refresh-btn:disabled,
+.refresh-section-btn:disabled {
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.refresh-btn i.fa-spin,
+.refresh-section-btn i.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}
+
+@keyframes fa-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Estilos para botón de sincronización de doctores */
+.sync-doctors-btn {
+    transition: all 0.3s ease;
+}
+
+.sync-doctors-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4) !important;
+}
+
+.sync-doctors-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(245, 87, 108, 0.3) !important;
+}
+
+.sync-doctors-btn:disabled {
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.sync-doctors-btn i.fa-spin {
+    animation: fa-spin 1s infinite linear;
+}

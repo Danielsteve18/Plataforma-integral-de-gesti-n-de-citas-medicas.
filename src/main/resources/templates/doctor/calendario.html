@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Calendario - MediPac</title>
+    <link rel="stylesheet" th:href="@{/admin/admin.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .calendario-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #007bff;
+        }
+        
+        .page-header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin: 0;
+        }
+        
+        .page-header .btn-volver {
+            background: #6c757d;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .page-header .btn-volver:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .descripcion {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #007bff;
+        }
+        
+        .dia-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #007bff;
+            transition: all 0.3s;
+        }
+        
+        .dia-card.activo {
+            border-left-color: #28a745;
+            background: #f1f9f3;
+        }
+        
+        .dia-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .dia-nombre {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .toggle-switch input {
+            display: none;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 30px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #28a745;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+        
+        .jornadas-container {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .jornada-checkbox {
+            display: none;
+        }
+        
+        .jornada-label {
+            padding: 0.7rem 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+        }
+        
+        .jornada-label i {
+            font-size: 1.1rem;
+        }
+        
+        .jornada-label .fa-sun {
+            color: #FFA726;
+        }
+        
+        .jornada-label .fa-cloud-sun {
+            color: #42A5F5;
+        }
+        
+        .jornada-label .fa-moon {
+            color: #5C6BC0;
+        }
+        
+        .jornada-checkbox:checked + .jornada-label {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .jornada-checkbox:checked + .jornada-label i {
+            color: white;
+        }
+        
+        .jornada-checkbox:disabled + .jornada-label {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .horario-info {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .btn-guardar {
+            background: #28a745;
+            color: white;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .btn-guardar:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+        
+        .alerta {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .alerta.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alerta.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alerta i {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendario-container">
+        <div class="page-header">
+            <h1><i class="fas fa-calendar-alt"></i> Mi Calendario Semanal</h1>
+            <a th:href="@{/doctor/dashboard}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+        
+        <div class="descripcion">
+            <p><strong><i class="fas fa-info-circle"></i> Configura tus días y horarios de atención</strong></p>
+            <p class="horario-info">
+                <i class="fas fa-sun"></i> Mañana: 08:00 - 12:00 &nbsp;|&nbsp;
+                <i class="fas fa-cloud-sun"></i> Tarde: 14:00 - 18:00 &nbsp;|&nbsp;
+                <i class="fas fa-moon"></i> Noche: 19:00 - 23:00
+            </p>
+        </div>
+        
+        <div th:if="${mensaje}" th:class="'alerta ' + ${tipo}">
+            <i th:class="${tipo == 'success'} ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+            <span th:text="${mensaje}"></span>
+        </div>
+        
+        <form th:action="@{/doctor/calendario/guardar}" method="post">
+            <div th:each="dia, iterStat : ${calendario.dias}" class="dia-card" 
+                 th:classappend="${dia.activo} ? 'activo' : ''">
+                
+                <div class="dia-header">
+                    <span class="dia-nombre" th:text="${dia.dia}">LUNES</span>
+                    
+                    <label class="toggle-switch">
+                        <input type="checkbox" 
+                               th:id="'toggle-' + ${iterStat.index}"
+                               th:name="'dias[' + ${iterStat.index} + '].activo'"
+                               th:checked="${dia.activo}"
+                               onchange="toggleJornadas(this)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <input type="hidden" 
+                       th:name="'dias[' + ${iterStat.index} + '].dia'" 
+                       th:value="${dia.dia}">
+                
+                <div class="jornadas-container" th:id="'jornadas-' + ${iterStat.index}">
+                    <div>
+                        <input type="checkbox" 
+                               class="jornada-checkbox"
+                               th:id="'manana-' + ${iterStat.index}"
+                               th:name="'dias[' + ${iterStat.index} + '].jornadas'"
+                               value="MAÑANA"
+                               th:checked="${#lists.contains(dia.jornadas, 'MAÑANA')}"
+                               th:disabled="${!dia.activo}">
+                        <label th:for="'manana-' + ${iterStat.index}" class="jornada-label">
+                            <i class="fas fa-sun"></i> 
+                            <span>Mañana</span>
+                        </label>
+                    </div>
+                    
+                    <div>
+                        <input type="checkbox" 
+                               class="jornada-checkbox"
+                               th:id="'tarde-' + ${iterStat.index}"
+                               th:name="'dias[' + ${iterStat.index} + '].jornadas'"
+                               value="TARDE"
+                               th:checked="${#lists.contains(dia.jornadas, 'TARDE')}"
+                               th:disabled="${!dia.activo}">
+                        <label th:for="'tarde-' + ${iterStat.index}" class="jornada-label">
+                            <i class="fas fa-cloud-sun"></i> 
+                            <span>Tarde</span>
+                        </label>
+                    </div>
+                    
+                    <div>
+                        <input type="checkbox" 
+                               class="jornada-checkbox"
+                               th:id="'noche-' + ${iterStat.index}"
+                               th:name="'dias[' + ${iterStat.index} + '].jornadas'"
+                               value="NOCHE"
+                               th:checked="${#lists.contains(dia.jornadas, 'NOCHE')}"
+                               th:disabled="${!dia.activo}">
+                        <label th:for="'noche-' + ${iterStat.index}" class="jornada-label">
+                            <i class="fas fa-moon"></i> 
+                            <span>Noche</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-guardar">
+                <i class="fas fa-save"></i> Guardar Calendario
+            </button>
+        </form>
+    </div>
+    
+    <script>
+        function toggleJornadas(checkbox) {
+            const index = checkbox.id.split('-')[1];
+            const jornadasContainer = document.getElementById('jornadas-' + index);
+            const checkboxes = jornadasContainer.querySelectorAll('.jornada-checkbox');
+            
+            checkboxes.forEach(cb => {
+                cb.disabled = !checkbox.checked;
+                if (!checkbox.checked) {
+                    cb.checked = false;
+                }
+            });
+            
+            const card = checkbox.closest('.dia-card');
+            if (checkbox.checked) {
+                card.classList.add('activo');
+            } else {
+                card.classList.remove('activo');
+            }
+        }
+        
+        // Inicializar estado al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+                toggleJornadas(toggle);
+            });
+        });
+    </script>
+</body>
+</html>

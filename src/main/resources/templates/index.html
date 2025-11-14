@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediPac</title>
+	<link rel="stylesheet" th:href="@{/index.css}">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+	<!-- GSAP Core -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+
+
+	
+</head>
+<body>
+    <div class="page-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="14" fill="#E8E8E8" stroke="#333" stroke-width="0.5"/>
+                        <g transform="translate(16, 16)">
+                            <line x1="0" y1="-8" x2="0" y2="8" stroke="#333" stroke-width="1.5"/>
+                            <line x1="-8" y1="0" x2="8" y2="0" stroke="#333" stroke-width="1.5"/>
+                            <line x1="-5.66" y1="-5.66" x2="5.66" y2="5.66" stroke="#333" stroke-width="1.5"/>
+                            <line x1="5.66" y1="-5.66" x2="-5.66" y2="5.66" stroke="#333" stroke-width="1.5"/>
+                        </g>
+                    </svg>
+                </div>
+                <nav class="nav">
+                    <a href="#inicio" class="nav-item">Inicio</a>
+                    <a href="#medicap" class="nav-item">Medicap</a>
+                    <a href="#" class="nav-item">nuevass</a>
+                    <a href="#" class="nav-item">viejass</a>
+                    <a href="#" class="nav-item">actuales</a>
+                </nav>
+	             <div class="ct_btn">
+					<a class="btn" th:href="@{/login}">Iniciar sesión</a>
+					<a class="btn" th:href="@{/register}">Registrarse</a>
+					<a class="btn admin-btn" th:href="@{/login?admin=true}">
+						<i class="fas fa-user-shield"></i> Admin
+					</a>
+				 </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section id="inicio" class="hero">
+            <!-- Background Image -->
+            <div class="hero-background">
+                <img src="/components/danieldoctor.png" alt="Profile" class="hero-image">
+                <!-- Gradient Overlay -->
+                <div class="hero-gradient"></div>
+            </div>
+
+            <!-- Hero Content -->
+            <div class="hero-content">
+                <!-- Top Banner -->
+                <div class="hero-banner">
+                    <span class="banner-text">Bienvenido a MediPac, Gestión de citas médicas en línea</span>
+                    <button class="banner-button">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 8L4 8M12 8L9 5M12 8L9 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Main Content -->
+                <div class="hero-main">
+                    <div class="hero-text">
+                        <h2 class="hero-brand">Daniel Montaño</h2>
+                        <h1 class="hero-title">MediPac</h1>
+						<h1 id="text-type" class="text-type" data-text="Gestion integral de citas medicas"></h1>
+                        <div class="hero-buttons">
+                            <span class="explore-text">Explore</span>
+                            <button class="pill-button">Steve Arboleda</button>
+                            <button class="pill-button">Salud y Bienestar</button>
+                            <button class="pill-button">Herramientas</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scroll Indicator -->
+                <div class="scroll-indicator">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 4L10 16M10 16L6 12M10 16L14 12" stroke="#999" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+        </section>
+		
+		<section id="medicap" class="hero seccion2">
+			<div class="containertextMedicap ">	
+				<div class="containertext">
+				  <div class="MedipacDescrip1">
+					<h1 class="porque">¿Por qué MediCap?</h1>
+					  <div id="scrambled-text" class="text-block ">
+						<p>
+							La justificación de este proyecto radica en el interés académico y profesional de desarrollar una plataforma tecnológica integral, capaz de administrar la programación de citas médicas y la interacción entre usuarios y profesionales de la salud. Este proceso representa un ejercicio formativo de alto valor, ya que permite aplicar los conocimientos en diseño web, bases de datos, lenguajes de programación y gestión de usuarios.
+							Asimismo, el proyecto promueve el fortalecimiento de habilidades en análisis, planificación y construcción de soluciones tecnológicas, lo que contribuye a la formación de un desarrollador con visión práctica e innovadora.
+							La creación de MediPac simboliza la aplicación de los principios del desarrollo ágil y la ingeniería de software en un entorno simulado, demostrando la capacidad de construir herramientas funcionales con impacto potencial en el ámbito social y tecnológico.
+	
+						</p>
+					  </div>
+				  </div>
+				
+				  <div class="MedipacDescrip2 ">
+					<img src="/components/icono1.png" alt="Icono MediPac" class="medipac-icon ">	
+				    <div class="scrolling-wrapper ">
+					
+				      <div class="scrolling-text ">
+				        <span>Tecnología que cuida. MediPac simplifica tu salud.</span>
+				      </div>
+				      
+				    </div>
+				  </div>
+
+				  <div class="MedipacDescrip3">
+				  	<div class="logoloop"></div>
+					
+				  </div>
+				</div>
+			</div>
+			
+		</section>
+		
+    </div>
+	
+	
+
+
+	<script type="module">
+	  document.addEventListener("DOMContentLoaded", () => {
+	    import("/js/title.js").then(({ createTextType }) => {
+	      createTextType({
+	        targetSelector: ".text-type",
+	        text: ["¡Bienvenido a MediPac!", "Gestión de citas médicas"],
+	        typingSpeed: 60,
+	        deletingSpeed: 30,
+	        pauseDuration: 1500,
+	        loop: true,
+	        showCursor: true,
+	        initialText: "",
+	        variableSpeed: { min: 40, max: 100 }
+	      });
+	    });
+	  });
+	</script>
+	<script type="module" src="/js/justificacion.js"></script>
+	<script type="module">
+					  import { createLogoLoop } from '/js/iconosInfintos.js';
+
+					  createLogoLoop({
+					    containerSelector: '.logoloop',
+					    logos: [
+					      { src: '/components/lops/01_html.png', alt: 'Logo 1' },
+					      { src: '/components/lops/02_css.png', alt: 'Logo 2' },
+					      { src: '/components/lops/03_js.svg', alt: 'Logo 3' },
+						  { src: '/components/lops/04_firebase.png', alt: 'Logo 4' },
+						  { src: '/components/lops/05_ia.svg', alt: 'Logo 5' },
+						  { src: '/components/lops/06_mysql.png', alt: 'Logo 6' },
+						  { src: '/components/lops/07_docker.svg', alt: 'Logo 7' },
+						  { src: '/components/lops/08_java.svg', alt: 'Logo 8' },
+						  { src: '/components/lops/09_python.svg', alt: 'Logo 9' }
+						  
+					    ],
+					    speed: 100,
+					    direction: 'left',
+					    logoHeight: 28,
+					    gap: 32,
+					    pauseOnHover: true,
+					    fadeOut: true,
+					    scaleOnHover: true
+					  });
+					</script>
+	
+
+</body>
+</html>
+

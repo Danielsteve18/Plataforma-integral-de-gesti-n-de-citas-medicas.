@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Gestión de Citas - Admin - MediPac</title>
+    <link rel="stylesheet" th:href="@{/admin/admin.css}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .citas-admin-container {
+            padding: 2rem;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+        .citas-header {
+            background: rgba(52, 58, 64, 0.1);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .citas-header h1 {
+            color: #343a40;
+            margin: 0;
+        }
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+        }
+        .stat-card.total { border-color: #007bff; }
+        .stat-card.pendientes { border-color: #ffc107; }
+        .stat-card.confirmadas { border-color: #28a745; }
+        .stat-card.completadas { border-color: #17a2b8; }
+        .stat-card.canceladas { border-color: #dc3545; }
+        .stat-card h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.95rem;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #343a40;
+        }
+        .filters-panel {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .filter-item label {
+            display: block;
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+        .filter-item input,
+        .filter-item select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .filter-item input:focus,
+        .filter-item select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .citas-table-wrapper {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead {
+            background: #343a40;
+            color: white;
+        }
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .badge-programada { background: #fff3cd; color: #856404; }
+        .badge-confirmada { background: #d4edda; color: #155724; }
+        .badge-completada { background: #d1ecf1; color: #0c5460; }
+        .badge-cancelada { background: #f8d7da; color: #721c24; }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .btn-sm {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateX(-5px);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="citas-admin-container">
+        <a th:href="@{/admin/dashboard}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+        </a>
+
+        <div class="citas-header">
+            <h1><i class="fas fa-calendar-alt"></i> Gestión de Citas Médicas</h1>
+            <p>Administración completa del sistema de citas</p>
+        </div>
+
+        <!-- Mensajes -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-dashboard">
+            <div class="stat-card total">
+                <h3>Total de Citas</h3>
+                <div class="number" th:text="${stats != null ? stats.total : '0'}">0</div>
+            </div>
+            <div class="stat-card pendientes">
+                <h3>Pendientes</h3>
+                <div class="number" th:text="${stats != null ? stats.pendientes : '0'}">0</div>
+            </div>
+            <div class="stat-card confirmadas">
+                <h3>Confirmadas</h3>
+                <div class="number" th:text="${stats != null ? stats.confirmadas : '0'}">0</div>
+            </div>
+            <div class="stat-card completadas">
+                <h3>Completadas</h3>
+                <div class="number" th:text="${stats != null ? stats.completadas : '0'}">0</div>
+            </div>
+            <div class="stat-card canceladas">
+                <h3>Canceladas</h3>
+                <div class="number" th:text="${stats != null ? stats.canceladas : '0'}">0</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-panel">
+            <h3 style="margin-top: 0;"><i class="fas fa-filter"></i> Filtros</h3>
+            <div class="filters-grid">
+                <div class="filter-item">
+                    <label>Estado</label>
+                    <select id="filtroEstado" onchange="filtrarCitas()">
+                        <option value="">Todos</option>
+                        <option value="PROGRAMADA">Programada</option>
+                        <option value="CONFIRMADA">Confirmada</option>
+                        <option value="COMPLETADA">Completada</option>
+                        <option value="CANCELADA">Cancelada</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>Fecha Desde</label>
+                    <input type="date" id="fechaDesde" onchange="filtrarCitas()">
+                </div>
+                <div class="filter-item">
+                    <label>Fecha Hasta</label>
+                    <input type="date" id="fechaHasta" onchange="filtrarCitas()">
+                </div>
+                <div class="filter-item">
+                    <label>Buscar</label>
+                    <input type="text" id="busqueda" placeholder="Paciente, doctor..." onkeyup="filtrarCitas()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de citas -->
+        <div class="citas-table-wrapper">
+            <div class="table-responsive" th:if="${citas != null and not #lists.isEmpty(citas)}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Paciente</th>
+                            <th>Doctor</th>
+                            <th>Especialidad</th>
+                            <th>Motivo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cita : ${citas}" 
+                            th:attr="data-estado=${cita.estado}, data-fecha=${cita.fecha}, 
+                                     data-paciente=${cita.paciente.nombre + ' ' + cita.paciente.apellido}, 
+                                     data-doctor=${cita.doctor.nombre + ' ' + cita.doctor.apellido}">
+                            <td th:text="${cita.id}">1</td>
+                            <td th:text="${#temporals.format(cita.fecha, 'dd/MM/yyyy')}">Fecha</td>
+                            <td th:text="${cita.horario}">Hora</td>
+                            <td>
+                                <strong th:text="${cita.paciente.nombre + ' ' + cita.paciente.apellido}">Paciente</strong><br>
+                                <small th:text="${cita.paciente.email}" style="color: #6c757d;">email</small>
+                            </td>
+                            <td>
+                                <strong th:text="'Dr. ' + ${cita.doctor.nombre + ' ' + cita.doctor.apellido}">Doctor</strong><br>
+                                <small th:text="${cita.doctor.email}" style="color: #6c757d;">email</small>
+                            </td>
+                            <td th:text="${cita.doctor.especialidad}">Especialidad</td>
+                            <td>
+                                <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    <span th:text="${cita.motivo}">Motivo</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="'badge-' + ${#strings.toLowerCase(cita.estado)}"
+                                      th:text="${cita.estado}">ESTADO</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <!-- Confirmar si está programada -->
+                                    <form th:if="${cita.estado == 'PROGRAMADA'}" 
+                                          th:action="@{/api/citas/{id}/confirmar(id=${cita.id})}" 
+                                          method="post" style="display: inline;">
+                                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-sm btn-success" title="Confirmar">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Completar si está confirmada -->
+                                    <form th:if="${cita.estado == 'CONFIRMADA'}" 
+                                          th:action="@{/api/citas/{id}/completar(id=${cita.id})}" 
+                                          method="post" style="display: inline;">
+                                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-sm btn-info" title="Completar">
+                                            <i class="fas fa-check-double"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Cancelar si no está completada ni cancelada -->
+                                    <form th:if="${cita.estado != 'COMPLETADA' and cita.estado != 'CANCELADA'}" 
+                                          th:action="@{/api/citas/{id}/cancelar(id=${cita.id})}" 
+                                          method="post" style="display: inline;">
+                                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                onclick="return confirm('¿Cancelar esta cita?')" title="Cancelar">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Eliminar (solo admin) -->
+                                    <form th:action="@{/api/citas/{id}(id=${cita.id})}" 
+                                          method="post" style="display: inline;">
+                                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                        <input type="hidden" name="_method" value="delete"/>
+                                        <button type="submit" class="btn btn-sm btn-secondary" 
+                                                onclick="return confirm('¿Eliminar esta cita permanentemente?')" title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="empty-state" th:if="${citas == null or #lists.isEmpty(citas)}">
+                <i class="fas fa-calendar-times"></i>
+                <h3>No hay citas registradas</h3>
+                <p>Las citas aparecerán aquí cuando los pacientes las agenden</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filtrarCitas() {
+            const estado = document.getElementById('filtroEstado').value.toUpperCase();
+            const fechaDesde = document.getElementById('fechaDesde').value;
+            const fechaHasta = document.getElementById('fechaHasta').value;
+            const busqueda = document.getElementById('busqueda').value.toLowerCase();
+
+            const filas = document.querySelectorAll('tbody tr');
+            
+            filas.forEach(fila => {
+                let mostrar = true;
+
+                // Filtrar por estado
+                if (estado && fila.dataset.estado !== estado) {
+                    mostrar = false;
+                }
+
+                // Filtrar por fecha
+                const fechaCita = fila.dataset.fecha;
+                if (fechaDesde && fechaCita < fechaDesde) {
+                    mostrar = false;
+                }
+                if (fechaHasta && fechaCita > fechaHasta) {
+                    mostrar = false;
+                }
+
+                // Filtrar por búsqueda de texto
+                if (busqueda) {
+                    const paciente = fila.dataset.paciente.toLowerCase();
+                    const doctor = fila.dataset.doctor.toLowerCase();
+                    if (!paciente.includes(busqueda) && !doctor.includes(busqueda)) {
+                        mostrar = false;
+                    }
+                }
+
+                fila.style.display = mostrar ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

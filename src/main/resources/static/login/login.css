@@ -1,0 +1,249 @@
+body {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 1) 0%,
+        rgba(255, 255, 255, 0.85) 20%,
+        rgba(240, 248, 255, 0.5) 40%,
+        rgba(255, 255, 255, 0.3) 60%,
+        rgba(255, 255, 255, 0.6) 80%,
+        rgba(255, 255, 255, 0.95) 100%
+    );
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doctor-background {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 120vw !important;
+  height: 120vh !important;
+  object-fit: cover !important;
+  object-position: center 47% !important; /* Más arriba para mostrar desde la frente */
+  pointer-events: none !important;
+  z-index: -1 !important;
+  opacity: 0.3 !important;
+  filter: grayscale(15%) blur(0.2px) !important;
+}
+
+/* Contenedor principal con estilo médico */
+.auth-container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 25px;
+    box-shadow: 
+        inset 2px 5px 15px rgba(30, 100, 180, 0.05), 
+        0 0 30px rgba(30, 100, 180, 0.15),
+        0 8px 32px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(30, 100, 180, 0.15);
+    backdrop-filter: blur(5px);
+    transition: .4s ease-in-out;
+}
+
+.auth-container:hover {
+    transform: scale(1.02);
+    border: 1px solid rgba(30, 100, 180, 0.4);
+    box-shadow: 
+        inset 2px 5px 15px rgba(30, 100, 180, 0.15), 
+        0 0 40px rgba(30, 100, 180, 0.3),
+        0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Mensaje de bienvenida con tema azul médico */
+.auth-message {
+    flex: 1;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(30, 100, 180, 0.3), rgba(50, 130, 200, 0.25), rgba(70, 160, 220, 0.2));
+    border-radius: 25px 0 0 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: inset 2px 5px 10px rgba(20, 80, 160, 0.1);
+}
+
+.auth-message h2 {
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+    color: rgb(255, 255, 255);
+    text-align: center;
+}
+
+.auth-message p {
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    color: #d3d3d3;
+    text-align: center;
+}
+
+.auth-button {
+    padding: 0.8rem 1.2rem;
+    background: rgba(30, 100, 180, 0.8);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+    transition: .4s ease-in-out;
+    border: 1px solid rgba(40, 120, 200, 0.6);
+    outline: none;
+}
+
+.auth-button:hover {
+    background: rgba(40, 120, 200, 0.9);
+    color: white;
+    transform: scale(1.05);
+    border-color: rgba(60, 140, 220, 0.8);
+}
+
+/* Formulario con estilo blanco-azul médico */
+.auth-form {
+    flex: 1;
+    padding: 2rem;
+    background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.35) 20%,
+        rgba(240, 248, 255, 0.3) 40%,
+        rgba(230, 245, 255, 0.25) 60%,
+        rgba(220, 240, 255, 0.3) 80%,
+        rgba(255, 255, 255, 0.4) 100%
+    );
+    border-radius: 0 25px 25px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: inset 2px 5px 15px rgba(30, 100, 180, 0.05);
+}
+
+.auth-form h2 {
+    text-align: center;
+    margin: 1em 0 2em 0;
+    color: rgb(30, 100, 180);
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+/* Grupos de campos con estilo field */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: rgb(40, 120, 200);
+    font-size: 1em;
+}
+
+.form-group input {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 25px;
+    padding: 0.8em;
+    border: 1px solid rgba(30, 100, 180, 0.2);
+    outline: none;
+    color: rgb(30, 100, 180);
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: inset 2px 5px 10px rgba(30, 100, 180, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+    transition: .4s ease-in-out;
+}
+
+.form-group input:focus {
+    background: rgba(240, 248, 255, 0.95);
+    border-color: rgba(30, 100, 180, 0.6);
+    transform: scale(1.02);
+    box-shadow: inset 2px 5px 10px rgba(30, 100, 180, 0.2), 0 0 10px rgba(30, 100, 180, 0.3);
+}
+
+.form-group input::placeholder {
+    color: rgba(30, 100, 180, 0.6);
+}
+
+/* Botón de envío */
+.auth-submit {
+    margin-top: 2.5em;
+    padding: 0.8rem 2.3rem;
+    background: linear-gradient(135deg, rgba(30, 100, 180, 0.9), rgba(40, 120, 200, 0.8));
+    color: white;
+    border: 1px solid rgba(30, 100, 180, 0.6);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: .4s ease-in-out;
+    font-size: 1rem;
+    align-self: center;
+    box-shadow: 0 4px 15px rgba(30, 100, 180, 0.3);
+}
+
+.auth-submit:hover {
+    background: linear-gradient(135deg, rgba(40, 120, 200, 1), rgba(60, 140, 220, 0.9));
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(30, 100, 180, 0.4);
+}
+
+/* Botón volver al inicio en esquina superior izquierda */
+.back-home-btn {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    z-index: 9999;
+    padding: 0.6rem 1rem;
+    background: rgba(30, 100, 180, 0.9);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-family: Arial, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(30, 100, 180, 0.5);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(30, 100, 180, 0.3);
+}
+
+.back-home-btn:hover {
+    background: rgba(40, 120, 200, 0.95);
+    border-color: rgba(60, 140, 220, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(30, 100, 180, 0.4);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .auth-container {
+        flex-direction: column;
+        max-width: 400px;
+        padding: 1rem;
+    }
+    
+    .auth-message {
+        border-radius: 25px 25px 0 0;
+        padding: 1.5rem;
+    }
+    
+    .auth-form {
+        border-radius: 0 0 25px 25px;
+        padding: 1.5rem;
+    }
+    
+    .back-home-btn {
+        top: -15px;
+        left: -15px;
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}

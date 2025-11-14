@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Agendar Cita - MediPac</title>
+    <link rel="stylesheet" th:href="@{/index.css}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .cita-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
+        .cita-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: rgba(30, 100, 180, 0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(30, 100, 180, 0.2);
+        }
+        .cita-header h1 {
+            color: rgb(30, 100, 180);
+            margin-bottom: 0.5rem;
+        }
+        .cita-form {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(30, 100, 180, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            color: rgb(30, 100, 180);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid rgba(30, 100, 180, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgb(30, 100, 180);
+            box-shadow: 0 0 0 3px rgba(30, 100, 180, 0.1);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .doctor-info {
+            background: rgba(30, 100, 180, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        .doctor-info.active {
+            display: block;
+        }
+        .doctor-info p {
+            margin: 0.5rem 0;
+            color: rgb(40, 120, 200);
+        }
+        .horarios-disponibles {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+        .horario-slot {
+            padding: 0.8rem;
+            background: rgba(30, 100, 180, 0.1);
+            border: 2px solid rgba(30, 100, 180, 0.3);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .horario-slot:hover {
+            background: rgba(30, 100, 180, 0.2);
+            border-color: rgb(30, 100, 180);
+        }
+        .horario-slot.selected {
+            background: rgb(30, 100, 180);
+            color: white;
+            border-color: rgb(30, 100, 180);
+        }
+        .horario-slot.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: rgba(150, 150, 150, 0.1);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(30, 100, 180, 0.9), rgba(40, 120, 200, 0.8));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .submit-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(40, 120, 200, 1), rgba(60, 140, 220, 0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 100, 180, 0.3);
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(108, 117, 125, 0.9);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: rgba(108, 117, 125, 1);
+            transform: translateX(-5px);
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="cita-container">
+        <a th:href="@{/paciente/dashboard}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+        </a>
+
+        <div class="cita-header">
+            <h1><i class="fas fa-calendar-plus"></i> Agendar Nueva Cita</h1>
+            <p>Selecciona el doctor, fecha y horario para tu consulta</p>
+        </div>
+
+        <!-- Mensajes -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <form class="cita-form" th:action="@{/api/citas}" method="post" id="citaForm">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            
+            <!-- Seleccionar Especialidad -->
+            <div class="form-group">
+                <label for="especialidad">
+                    <i class="fas fa-stethoscope"></i> Especialidad Médica
+                </label>
+                <select id="especialidad" name="especialidad" required>
+                    <option value="">Seleccione una especialidad...</option>
+                    <option value="MEDICINA_GENERAL">Medicina General</option>
+                    <option value="PEDIATRIA">Pediatría</option>
+                    <option value="CARDIOLOGIA">Cardiología</option>
+                    <option value="DERMATOLOGIA">Dermatología</option>
+                    <option value="TRAUMATOLOGIA">Traumatología</option>
+                    <option value="GINECOLOGIA">Ginecología</option>
+                    <option value="OFTALMOLOGIA">Oftalmología</option>
+                    <option value="PSIQUIATRIA">Psiquiatría</option>
+                    <option value="NEUROLOGIA">Neurología</option>
+                    <option value="ODONTOLOGIA">Odontología</option>
+                </select>
+            </div>
+
+            <!-- Seleccionar Doctor -->
+            <div class="form-group">
+                <label for="doctorId">
+                    <i class="fas fa-user-md"></i> Seleccionar Doctor
+                </label>
+                <select id="doctorId" name="doctorId" required disabled>
+                    <option value="">Primero seleccione una especialidad...</option>
+                </select>
+                <div id="doctorInfo" class="doctor-info"></div>
+            </div>
+
+            <!-- Seleccionar Fecha -->
+            <div class="form-group">
+                <label for="fecha">
+                    <i class="fas fa-calendar"></i> Fecha de la Cita
+                </label>
+                <input type="date" id="fecha" name="fecha" required disabled 
+                       th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}">
+            </div>
+
+            <!-- Seleccionar Horario -->
+            <div class="form-group">
+                <label>
+                    <i class="fas fa-clock"></i> Horario Disponible
+                </label>
+                <div id="horariosDisponibles" class="horarios-disponibles">
+                    <p class="alert alert-info">Seleccione un doctor y una fecha para ver los horarios disponibles</p>
+                </div>
+                <input type="hidden" id="horario" name="horario" required>
+            </div>
+
+            <!-- Motivo de Consulta -->
+            <div class="form-group">
+                <label for="motivo">
+                    <i class="fas fa-notes-medical"></i> Motivo de la Consulta
+                </label>
+                <textarea id="motivo" name="motivo" 
+                          placeholder="Describa brevemente el motivo de su consulta..." 
+                          required></textarea>
+            </div>
+
+            <!-- Notas Adicionales (Opcional) -->
+            <div class="form-group">
+                <label for="notas">
+                    <i class="fas fa-comment-medical"></i> Notas Adicionales (Opcional)
+                </label>
+                <textarea id="notas" name="notas" 
+                          placeholder="Información adicional que considere relevante..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                <i class="fas fa-calendar-check"></i> Confirmar Cita
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+        
+        const especialidadSelect = document.getElementById('especialidad');
+        const doctorSelect = document.getElementById('doctorId');
+        const fechaInput = document.getElementById('fecha');
+        const horarioInput = document.getElementById('horario');
+        const submitBtn = document.getElementById('submitBtn');
+        const doctorInfo = document.getElementById('doctorInfo');
+        const horariosContainer = document.getElementById('horariosDisponibles');
+
+        // Cargar doctores cuando se selecciona especialidad
+        especialidadSelect.addEventListener('change', async function() {
+            const especialidad = this.value;
+            doctorSelect.disabled = true;
+            fechaInput.disabled = true;
+            doctorSelect.innerHTML = '<option value="">Cargando doctores...</option>';
+            doctorInfo.classList.remove('active');
+            horariosContainer.innerHTML = '';
+            horarioInput.value = '';
+            submitBtn.disabled = true;
+
+            if (!especialidad) {
+                doctorSelect.innerHTML = '<option value="">Primero seleccione una especialidad...</option>';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/doctores/especialidad/${especialidad}`);
+                const doctores = await response.json();
+
+                if (doctores.length === 0) {
+                    doctorSelect.innerHTML = '<option value="">No hay doctores disponibles</option>';
+                    return;
+                }
+
+                doctorSelect.innerHTML = '<option value="">Seleccione un doctor...</option>';
+                doctores.forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor.id;
+                    option.textContent = `Dr. ${doctor.nombre} ${doctor.apellido}`;
+                    option.dataset.info = JSON.stringify(doctor);
+                    doctorSelect.appendChild(option);
+                });
+
+                doctorSelect.disabled = false;
+            } catch (error) {
+                console.error('Error:', error);
+                doctorSelect.innerHTML = '<option value="">Error al cargar doctores</option>';
+            }
+        });
+
+        // Mostrar información del doctor
+        doctorSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            fechaInput.disabled = !this.value;
+            horariosContainer.innerHTML = '';
+            horarioInput.value = '';
+            submitBtn.disabled = true;
+
+            if (this.value && selectedOption.dataset.info) {
+                const doctor = JSON.parse(selectedOption.dataset.info);
+                doctorInfo.innerHTML = `
+                    <p><strong>Especialidad:</strong> ${doctor.especialidad}</p>
+                    <p><strong>Experiencia:</strong> ${doctor.anosExperiencia || 'No especificado'} años</p>
+                    ${doctor.telefono ? `<p><strong>Teléfono:</strong> ${doctor.telefono}</p>` : ''}
+                `;
+                doctorInfo.classList.add('active');
+            } else {
+                doctorInfo.classList.remove('active');
+            }
+        });
+
+        // Cargar horarios disponibles cuando se selecciona fecha
+        fechaInput.addEventListener('change', async function() {
+            const doctorId = doctorSelect.value;
+            const fecha = this.value;
+            
+            if (!doctorId || !fecha) return;
+
+            horariosContainer.innerHTML = '<p class="alert alert-info">Cargando horarios...</p>';
+            horarioInput.value = '';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/citas/disponibles?doctorId=${doctorId}&fecha=${fecha}`);
+                const horarios = await response.json();
+
+                if (horarios.length === 0) {
+                    horariosContainer.innerHTML = '<p class="alert alert-error">No hay horarios disponibles para esta fecha</p>';
+                    return;
+                }
+
+                horariosContainer.innerHTML = '';
+                horarios.forEach(horario => {
+                    const slot = document.createElement('div');
+                    slot.className = 'horario-slot';
+                    slot.textContent = horario;
+                    slot.dataset.horario = horario;
+                    
+                    slot.addEventListener('click', function() {
+                        document.querySelectorAll('.horario-slot').forEach(s => s.classList.remove('selected'));
+                        this.classList.add('selected');
+                        horarioInput.value = this.dataset.horario;
+                        submitBtn.disabled = false;
+                    });
+                    
+                    horariosContainer.appendChild(slot);
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                horariosContainer.innerHTML = '<p class="alert alert-error">Error al cargar horarios</p>';
+            }
+        });
+
+        // Validar formulario antes de enviar
+        document.getElementById('citaForm').addEventListener('submit', function(e) {
+            if (!horarioInput.value) {
+                e.preventDefault();
+                alert('Por favor seleccione un horario');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #000;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 10;
+  position: relative;
+}
+
+.error-code-canvas {
+  margin-bottom: 2rem;
+}
+
+.error-title-canvas {
+  margin-bottom: 3rem;
+}
+
+/* Estilos para los párrafos de descripción */
+.error-content p {
+  color: #fff;
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+  opacity: 0.8;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  font-family: 'Courier New', monospace;
+  z-index: 10;
+  position: relative;
+}
+
+/* Fondo con efecto Letter Glitch */
+.error-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}

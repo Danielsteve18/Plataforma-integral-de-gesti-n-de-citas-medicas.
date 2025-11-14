@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Panel de Administración - MediPac</title>
+    <link rel="stylesheet" th:href="@{/admin/admin.css}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-content">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="admin-title">
+                <i class="fas fa-user-shield"></i>
+                Panel de Administración
+            </h1>
+            <div class="header-actions">
+                <span class="admin-user">Administrador</span>
+                <form action="/logout" method="post" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button type="submit" class="logout-btn" style="background: none; border: none; cursor: pointer; color: inherit; font: inherit;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <!-- Dashboard -->
+            <div class="sidebar-section">
+                <a href="/admin/dashboard" class="sidebar-item dashboard-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Gestión de Citas -->
+            <div class="sidebar-section">
+                <a href="/admin/citas" 
+                   class="sidebar-item"
+                   th:classappend="${seccion == 'citas'} ? 'active' : ''">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Citas Médicas</span>
+                    <span class="badge" th:text="${stats != null and stats.totalCitas != null ? stats.totalCitas : '0'}">0</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Gestión de Usuarios -->
+            <div class="sidebar-section">
+                <a href="/admin/usuarios" 
+                   class="sidebar-item"
+                   th:classappend="${seccion == 'usuarios'} ? 'active' : ''">
+                    <i class="fas fa-users"></i>
+                    <span>Todos los Usuarios</span>
+                    <span class="badge" th:text="${stats != null ? stats.totalUsuarios : '0'}">0</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Pacientes -->
+            <div class="sidebar-section">
+                <a href="/admin/pacientes" 
+                   class="sidebar-item"
+                   th:classappend="${seccion == 'pacientes'} ? 'active' : ''">
+                    <i class="fas fa-user-injured"></i>
+                    <span>Pacientes</span>
+                    <span class="badge" th:text="${stats != null ? stats.totalPacientes : '0'}">0</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Doctores -->
+            <div class="sidebar-section">
+                <a href="/admin/doctores" 
+                   class="sidebar-item"
+                   th:classappend="${seccion == 'doctores'} ? 'active' : ''">
+                    <i class="fas fa-user-md"></i>
+                    <span>Doctores</span>
+                    <span class="badge" th:text="${stats != null ? stats.totalDoctores : '0'}">0</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Administradores -->
+            <div class="sidebar-section">
+                <a href="/admin/administradores" 
+                   class="sidebar-item"
+                   th:classappend="${seccion == 'administradores'} ? 'active' : ''">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Administradores</span>
+                    <span class="badge" th:text="${stats != null ? stats.totalAdmins : '0'}">0</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Usuarios Bloqueados -->
+            <div class="sidebar-section">
+                <a href="/admin/bloqueados" 
+                   class="sidebar-item blocked-section"
+                   th:classappend="${seccion == 'bloqueados'} ? 'active' : ''">
+                    <i class="fas fa-user-slash"></i>
+                    <span>Bloqueados</span>
+                    <span class="badge badge-danger" th:text="${stats != null ? stats.totalBloqueados : '0'}">0</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="content-container">
+            <!-- Dashboard por defecto -->
+            <div th:if="${seccion == null}" class="dashboard-view">
+                <!-- Botón de Refrescar Dashboard -->
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+                    <button onclick="refrescarDashboard()" class="refresh-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 25px; cursor: pointer; font-size: 16px; font-weight: 500; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); display: flex; align-items: center; gap: 10px; transition: all 0.3s;">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Actualizar Dashboard</span>
+                    </button>
+                </div>
+                
+                <div class="dashboard-cards">
+                    <div class="dashboard-card usuarios-card">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Total Usuarios</h3>
+                            <span class="card-number" th:text="${stats != null ? stats.totalUsuarios : '0'}">0</span>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card pacientes-card">
+                        <div class="card-icon">
+                            <i class="fas fa-user-injured"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Pacientes</h3>
+                            <span class="card-number" th:text="${stats != null ? stats.totalPacientes : '0'}">0</span>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card doctores-card">
+                        <div class="card-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Doctores</h3>
+                            <span class="card-number" th:text="${stats != null ? stats.totalDoctores : '0'}">0</span>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card admins-card">
+                        <div class="card-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Administradores</h3>
+                            <span class="card-number" th:text="${stats != null ? stats.totalAdmins : '0'}">0</span>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card bloqueados-card">
+                        <div class="card-icon">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Bloqueados</h3>
+                            <span class="card-number" th:text="${stats != null ? stats.totalBloqueados : '0'}">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vista de usuarios -->
+            <div th:if="${seccion != null}" class="users-view" th:attr="data-seccion=${seccion}">
+                <!-- Mensajes de éxito/error -->
+                <div th:if="${success}" class="alert alert-success" style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fas fa-check-circle"></i> <span th:text="${success}"></span></span>
+                    <button onclick="location.reload()" class="btn-reload-home" style="background: #28a745; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <i class="fas fa-home"></i> Inicio
+                    </button>
+                </div>
+                <div th:if="${error}" class="alert alert-error" style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span></span>
+                    <button onclick="location.reload()" class="btn-reload-home" style="background: #dc3545; color: white; border: none; padding: 8px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <i class="fas fa-home"></i> Inicio
+                    </button>
+                </div>
+                
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>
+                        <span th:if="${seccion == 'usuarios'}">
+                            <i class="fas fa-users"></i> Gestión de Usuarios
+                        </span>
+                        <span th:if="${seccion == 'pacientes'}">
+                            <i class="fas fa-user-injured"></i> Pacientes
+                        </span>
+                        <span th:if="${seccion == 'doctores'}">
+                            <i class="fas fa-user-md"></i> Doctores
+                        </span>
+                        <span th:if="${seccion == 'administradores'}">
+                            <i class="fas fa-user-shield"></i> Administradores
+                        </span>
+                        <span th:if="${seccion == 'bloqueados'}">
+                            <i class="fas fa-user-slash"></i> Usuarios Bloqueados
+                        </span>
+                    </h2>
+                    <button th:data-seccion="${seccion}" onclick="refrescarSeccion(this.getAttribute('data-seccion'))" class="refresh-section-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 500; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); display: flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Actualizar</span>
+                    </button>
+                </div>
+
+                <div class="users-table-container">
+                    <div th:if="${usuarios != null and not #lists.isEmpty(usuarios)}" class="users-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Rol Actual</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="usuario : ${usuarios}">
+                                    <td th:text="${usuario.id}">1</td>
+                                    <td>
+                                        <div class="user-info">
+                                            <i class="fas fa-user-circle user-avatar"></i>
+                                            <span th:text="${usuario.username}">username</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${usuario.email}">email@example.com</td>
+                                    <td>
+                                        <span class="role-badge" 
+                                              th:classappend="${usuario.rol == 'ADMIN' or usuario.rol == 'ADMINISTRADOR'} ? 'role-admin' : 
+                                                             (${usuario.rol == 'DOCTOR'} ? 'role-doctor' : 
+                                                             (${usuario.rol == 'PACIENTE'} ? 'role-paciente' : 'role-bloqueado'))"
+                                              th:text="${usuario.rol}">ROL</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy')}">01/01/2024</td>
+                                    <td>
+                                        <div class="user-actions">
+                                            <!-- Formulario para cambiar rol -->
+                                            <form th:action="@{/admin/cambiar-rol}" method="post" style="display: inline-block;">
+                                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                                <input type="hidden" name="usuarioId" th:value="${usuario.id}"/>
+                                                <select name="nuevoRol" class="role-select" onchange="this.form.submit();">
+                                                    <option value="">Cambiar rol...</option>
+                                                    <option value="PACIENTE" th:selected="${usuario.rol == 'PACIENTE'}">Paciente</option>
+                                                    <option value="DOCTOR" th:selected="${usuario.rol == 'DOCTOR'}">Doctor</option>
+                                                    <option value="ADMIN" th:selected="${usuario.rol == 'ADMIN' or usuario.rol == 'ADMINISTRADOR'}">Administrador</option>
+                                                </select>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div th:if="${usuarios == null or #lists.isEmpty(usuarios)}" class="no-users">
+                        <i class="fas fa-users"></i>
+                        <p>No hay usuarios en esta categoría</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <style>
+        .btn-reload-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .btn-reload-home:active {
+            transform: translateY(0);
+        }
+    </style>
+
+    <script>
+        // Obtener tokens CSRF
+        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        // Toggle sidebar
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        });
+
+        // Auto-collapse sidebar en móviles
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+        }
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+            }
+        });
+
+        // Funciones AJAX dinámicas
+        function showMessage(message, type = 'success') {
+            // Crear o encontrar el contenedor de mensajes
+            let container = document.querySelector('.alert');
+            if (!container) {
+                container = document.createElement('div');
+                const contentContainer = document.querySelector('.content-container');
+                contentContainer.insertBefore(container, contentContainer.firstChild);
+            }
+            
+            container.className = `alert alert-${type}`;
+            container.style.cssText = `
+                background: ${type === 'success' ? '#d4edda' : '#f8d7da'}; 
+                color: ${type === 'success' ? '#155724' : '#721c24'}; 
+                padding: 10px; 
+                border-radius: 5px; 
+                margin-bottom: 20px;
+            `;
+            container.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}`;
+            
+            // Auto-hide after 3 seconds
+            setTimeout(() => {
+                if (container.parentNode) {
+                    container.remove();
+                }
+            }, 3000);
+        }
+
+        // Función para cambiar rol dinámicamente
+        function cambiarRolDinamico(selectElement, usuarioId) {
+            const nuevoRol = selectElement.value;
+            if (!nuevoRol) return;
+            
+            if (!confirm('¿Cambiar el rol de este usuario?')) {
+                selectElement.value = ''; // Reset select
+                return;
+            }
+
+            fetch('/admin/cambiar-rol-ajax', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
+                body: JSON.stringify({
+                    usuarioId: usuarioId,
+                    nuevoRol: nuevoRol
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    // Actualizar el badge del rol
+                    const roleBadge = selectElement.closest('tr').querySelector('.role-badge');
+                    if (roleBadge) {
+                        roleBadge.textContent = nuevoRol;
+                        roleBadge.className = 'role-badge';
+                        if (nuevoRol === 'ADMIN' || nuevoRol === 'ADMINISTRADOR') {
+                            roleBadge.classList.add('role-admin');
+                        } else if (nuevoRol === 'DOCTOR') {
+                            roleBadge.classList.add('role-doctor');
+                        } else if (nuevoRol === 'PACIENTE') {
+                            roleBadge.classList.add('role-paciente');
+                        }
+                    }
+                } else {
+                    showMessage(data.message, 'error');
+                }
+                selectElement.value = ''; // Reset select
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error al cambiar el rol', 'error');
+                selectElement.value = ''; // Reset select
+            });
+        }
+
+        // Función para cambiar estado (bloquear/desbloquear) dinámicamente
+        function cambiarEstadoDinamico(buttonElement, usuarioId, activo) {
+            const accion = activo ? 'Bloquear usuario' : 'Desbloquear usuario';
+            
+            if (!confirm(accion + '?')) {
+                return;
+            }
+
+            fetch('/admin/cambiar-estado-ajax', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
+                body: JSON.stringify({
+                    usuarioId: usuarioId,
+                    activo: !activo // Invertir el estado actual
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    
+                    // Actualizar el botón y el badge
+                    const roleBadge = buttonElement.closest('tr').querySelector('.role-badge');
+                    const icon = buttonElement.querySelector('i');
+                    
+                    if (data.bloqueado) {
+                        // Usuario fue bloqueado
+                        buttonElement.className = 'action-btn block-btn unblock';
+                        buttonElement.title = 'Desbloquear usuario';
+                        icon.className = 'fas fa-unlock';
+                        if (roleBadge) {
+                            roleBadge.textContent = 'BLOQUEADO';
+                            roleBadge.className = 'role-badge role-bloqueado';
+                        }
+                    } else {
+                        // Usuario fue desbloqueado
+                        buttonElement.className = 'action-btn block-btn block';
+                        buttonElement.title = 'Bloquear usuario';
+                        icon.className = 'fas fa-ban';
+                        if (roleBadge) {
+                            roleBadge.textContent = data.rolAnterior || 'PACIENTE';
+                            roleBadge.className = 'role-badge';
+                            if (data.rolAnterior === 'ADMIN') {
+                                roleBadge.classList.add('role-admin');
+                            } else if (data.rolAnterior === 'DOCTOR') {
+                                roleBadge.classList.add('role-doctor');
+                            } else {
+                                roleBadge.classList.add('role-paciente');
+                            }
+                        }
+                    }
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error al cambiar el estado del usuario', 'error');
+            });
+        }
+
+        // Agregar event listeners dinámicos cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Para los selects de rol
+            document.querySelectorAll('.role-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const usuarioId = this.closest('form').querySelector('input[name="usuarioId"]').value;
+                    cambiarRolDinamico(this, usuarioId);
+                });
+            });
+
+            // Para los botones de bloqueo
+            document.querySelectorAll('.block-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+                    const usuarioId = form.querySelector('input[name="usuarioId"]').value;
+                    const activo = form.querySelector('input[name="activo"]').value === 'true';
+                    cambiarEstadoDinamico(this, usuarioId, activo);
+                });
+            });
+        });
+
+        // Función para refrescar el dashboard completo
+        function refrescarDashboard() {
+            const refreshBtn = document.querySelector('.refresh-btn');
+            const icon = refreshBtn.querySelector('i');
+            const span = refreshBtn.querySelector('span');
+            
+            // Animar el botón
+            icon.classList.add('fa-spin');
+            span.textContent = 'Actualizando...';
+            refreshBtn.disabled = true;
+            refreshBtn.style.opacity = '0.7';
+            
+            // Hacer fetch a la API del dashboard
+            fetch('/admin/dashboard', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/html'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Crear un documento temporal para parsear el HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Actualizar las tarjetas de estadísticas
+                const cards = document.querySelectorAll('.dashboard-card .card-number');
+                const newCards = doc.querySelectorAll('.dashboard-card .card-number');
+                cards.forEach((card, index) => {
+                    if (newCards[index]) {
+                        card.textContent = newCards[index].textContent;
+                        // Animar el cambio
+                        card.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            card.style.transform = 'scale(1)';
+                        }, 200);
+                    }
+                });
+                
+                // Actualizar los badges del sidebar
+                const badges = document.querySelectorAll('.sidebar .badge');
+                const newBadges = doc.querySelectorAll('.sidebar .badge');
+                badges.forEach((badge, index) => {
+                    if (newBadges[index]) {
+                        badge.textContent = newBadges[index].textContent;
+                    }
+                });
+                
+                // Actualizar la tabla de usuarios si existe
+                const userTable = document.querySelector('.users-table tbody');
+                const newUserTable = doc.querySelector('.users-table tbody');
+                if (userTable && newUserTable) {
+                    userTable.innerHTML = newUserTable.innerHTML;
+                    
+                    // Re-agregar event listeners para los nuevos elementos
+                    userTable.querySelectorAll('.role-select').forEach(select => {
+                        select.addEventListener('change', function() {
+                            const usuarioId = this.closest('form').querySelector('input[name="usuarioId"]').value;
+                            cambiarRolDinamico(this, usuarioId);
+                        });
+                    });
+                    
+                    userTable.querySelectorAll('.block-btn').forEach(button => {
+                        button.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const form = this.closest('form');
+                            const usuarioId = form.querySelector('input[name="usuarioId"]').value;
+                            const activo = form.querySelector('input[name="activo"]').value === 'true';
+                            cambiarEstadoDinamico(this, usuarioId, activo);
+                        });
+                    });
+                }
+                
+                // Mostrar mensaje de éxito
+                showMessage('Dashboard actualizado correctamente', 'success');
+                
+                // Restaurar el botón
+                icon.classList.remove('fa-spin');
+                span.textContent = 'Actualizar Dashboard';
+                refreshBtn.disabled = false;
+                refreshBtn.style.opacity = '1';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error al actualizar el dashboard', 'error');
+                
+                // Restaurar el botón en caso de error
+                icon.classList.remove('fa-spin');
+                span.textContent = 'Actualizar Dashboard';
+                refreshBtn.disabled = false;
+                refreshBtn.style.opacity = '1';
+            });
+        }
+
+        // Función para refrescar una sección específica
+        function refrescarSeccion(seccion) {
+            const refreshBtn = document.querySelector('.refresh-section-btn');
+            const icon = refreshBtn.querySelector('i');
+            const span = refreshBtn.querySelector('span');
+            
+            // Animar el botón
+            icon.classList.add('fa-spin');
+            span.textContent = 'Actualizando...';
+            refreshBtn.disabled = true;
+            refreshBtn.style.opacity = '0.7';
+            
+            // Hacer fetch a la sección específica
+            fetch(`/admin/${seccion}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'text/html'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Crear un documento temporal para parsear el HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Actualizar la tabla de usuarios
+                const userTable = document.querySelector('.users-table tbody');
+                const newUserTable = doc.querySelector('.users-table tbody');
+                if (userTable && newUserTable) {
+                    userTable.innerHTML = newUserTable.innerHTML;
+                    
+                    // Re-agregar event listeners para los nuevos elementos
+                    userTable.querySelectorAll('.role-select').forEach(select => {
+                        select.addEventListener('change', function() {
+                            const usuarioId = this.closest('form').querySelector('input[name="usuarioId"]').value;
+                            cambiarRolDinamico(this, usuarioId);
+                        });
+                    });
+                    
+                    userTable.querySelectorAll('.block-btn').forEach(button => {
+                        button.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const form = this.closest('form');
+                            const usuarioId = form.querySelector('input[name="usuarioId"]').value;
+                            const activo = form.querySelector('input[name="activo"]').value === 'true';
+                            cambiarEstadoDinamico(this, usuarioId, activo);
+                        });
+                    });
+                }
+                
+                // Actualizar los badges del sidebar
+                const badges = document.querySelectorAll('.sidebar .badge');
+                const newBadges = doc.querySelectorAll('.sidebar .badge');
+                badges.forEach((badge, index) => {
+                    if (newBadges[index]) {
+                        badge.textContent = newBadges[index].textContent;
+                    }
+                });
+                
+                // Mostrar mensaje de éxito
+                showMessage('Sección actualizada correctamente', 'success');
+                
+                // Restaurar el botón
+                icon.classList.remove('fa-spin');
+                span.textContent = 'Actualizar';
+                refreshBtn.disabled = false;
+                refreshBtn.style.opacity = '1';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('Error al actualizar la sección', 'error');
+                
+                // Restaurar el botón en caso de error
+                icon.classList.remove('fa-spin');
+                span.textContent = 'Actualizar';
+                refreshBtn.disabled = false;
+                refreshBtn.style.opacity = '1';
+            });
+        }
+        
+        // Función para sincronizar doctores faltantes
+    </script>
+</body>
+</html>

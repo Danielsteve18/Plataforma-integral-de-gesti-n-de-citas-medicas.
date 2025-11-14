@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Perfil - MediPac</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #228b22 0%, #32a032 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #228b22;
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-volver {
+            background: linear-gradient(135deg, #228b22 0%, #32a032 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(34, 139, 34, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-volver:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 139, 34, 0.4);
+        }
+
+        .perfil-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .perfil-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .perfil-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #228b22 0%, #32a032 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 48px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group label i {
+            color: #228b22;
+            margin-right: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #228b22;
+            box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+        }
+
+        .form-control:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .especialidades-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .especialidades-section h3 {
+            color: #228b22;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .especialidades-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+
+        .especialidad-badge {
+            background: linear-gradient(135deg, #228b22 0%, #32a032 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .no-especialidades {
+            color: #999;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .btn-guardar {
+            background: linear-gradient(135deg, #228b22 0%, #32a032 100%);
+            color: white;
+            padding: 14px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(34, 139, 34, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+        }
+
+        .btn-guardar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 139, 34, 0.4);
+        }
+
+        .info-text {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #0d47a1;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .perfil-container {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-user-edit"></i>
+                Editar Perfil
+            </h1>
+            <a th:href="@{/doctor/dashboard}" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver
+            </a>
+        </div>
+
+        <div class="perfil-container">
+            <div class="perfil-header">
+                <div class="perfil-icon">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h2 th:text="${doctor.nombreCompleto}">Dr. Juan Pérez</h2>
+                <p style="color: #666; font-size: 14px;">Actualiza tu información profesional</p>
+            </div>
+
+            <div th:if="${mensaje}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${mensaje}">Perfil actualizado correctamente</span>
+            </div>
+
+            <div th:if="${error}" class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${error}">Error al actualizar el perfil</span>
+            </div>
+
+            <form th:action="@{/doctor/editar-perfil}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <div class="info-text">
+                    <i class="fas fa-info-circle"></i>
+                    Para cambiar tu correo o contraseña, contacta al administrador del sistema.
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-envelope"></i>
+                            Correo Electrónico
+                        </label>
+                        <input type="email" class="form-control" th:value="${doctor.usuario.email}" disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-user"></i>
+                            Usuario
+                        </label>
+                        <input type="text" class="form-control" th:value="${doctor.usuario.username}" disabled>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nombre">
+                            <i class="fas fa-id-card"></i>
+                            Nombre *
+                        </label>
+                        <input type="text" 
+                               id="nombre" 
+                               name="nombre" 
+                               class="form-control" 
+                               th:value="${doctor.nombre}"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="apellido">
+                            <i class="fas fa-id-card"></i>
+                            Apellido *
+                        </label>
+                        <input type="text" 
+                               id="apellido" 
+                               name="apellido" 
+                               class="form-control" 
+                               th:value="${doctor.apellido}"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telefono">
+                            <i class="fas fa-phone"></i>
+                            Teléfono
+                        </label>
+                        <input type="tel" 
+                               id="telefono" 
+                               name="telefono" 
+                               class="form-control" 
+                               th:value="${doctor.telefono}"
+                               placeholder="(###) ###-####">
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-certificate"></i>
+                            Número de Licencia
+                        </label>
+                        <input type="text" class="form-control" th:value="${doctor.numeroLicencia}" disabled>
+                    </div>
+                </div>
+
+                <div class="especialidades-section">
+                    <h3>
+                        <i class="fas fa-stethoscope"></i> Especialidades Registradas
+                    </h3>
+                    <div class="especialidades-list">
+                        <span th:if="${#lists.isEmpty(doctor.especialidades)}" class="no-especialidades">
+                            Sin especialidades registradas
+                        </span>
+                        <div th:each="esp : ${doctor.especialidades}" class="especialidad-badge" th:text="${esp.nombre}">
+                            Medicina General
+                        </div>
+                    </div>
+                    <p style="font-size: 13px; color: #666; margin: 0;">
+                        <i class="fas fa-info-circle"></i>
+                        Para modificar tus especialidades, contacta al administrador.
+                    </p>
+                </div>
+
+                <button type="submit" class="btn-guardar">
+                    <i class="fas fa-save"></i>
+                    Guardar Cambios
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
