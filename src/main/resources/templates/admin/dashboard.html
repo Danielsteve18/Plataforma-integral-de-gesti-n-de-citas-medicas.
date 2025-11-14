@@ -107,19 +107,6 @@
                     <span class="badge" th:text="${stats != null ? stats.totalAdmins : '0'}">0</span>
                 </a>
             </div>
-
-            <div class="sidebar-divider"></div>
-
-            <!-- Usuarios Bloqueados -->
-            <div class="sidebar-section">
-                <a href="/admin/bloqueados" 
-                   class="sidebar-item blocked-section"
-                   th:classappend="${seccion == 'bloqueados'} ? 'active' : ''">
-                    <i class="fas fa-user-slash"></i>
-                    <span>Bloqueados</span>
-                    <span class="badge badge-danger" th:text="${stats != null ? stats.totalBloqueados : '0'}">0</span>
-                </a>
-            </div>
         </div>
     </aside>
 
@@ -176,16 +163,6 @@
                             <span class="card-number" th:text="${stats != null ? stats.totalAdmins : '0'}">0</span>
                         </div>
                     </div>
-
-                    <div class="dashboard-card bloqueados-card">
-                        <div class="card-icon">
-                            <i class="fas fa-ban"></i>
-                        </div>
-                        <div class="card-content">
-                            <h3>Bloqueados</h3>
-                            <span class="card-number" th:text="${stats != null ? stats.totalBloqueados : '0'}">0</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -218,9 +195,6 @@
                         </span>
                         <span th:if="${seccion == 'administradores'}">
                             <i class="fas fa-user-shield"></i> Administradores
-                        </span>
-                        <span th:if="${seccion == 'bloqueados'}">
-                            <i class="fas fa-user-slash"></i> Usuarios Bloqueados
                         </span>
                     </h2>
                     <button th:data-seccion="${seccion}" onclick="refrescarSeccion(this.getAttribute('data-seccion'))" class="refresh-section-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 14px; font-weight: 500; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); display: flex; align-items: center; gap: 8px; transition: all 0.3s;">

@@ -41,6 +41,12 @@ public class CitaRestController {
     
     @Autowired
     private CitaMapper citaMapper;
+    
+    @Autowired
+    private DoctorRepository doctorRepository;
+    
+    @Autowired
+    private EspecialidadRepository especialidadRepository;
 
     // Helper method para obtener el usuario logueado
     private Usuario getUsuarioLogueado() {
@@ -52,6 +58,91 @@ public class CitaRestController {
     }
 
     // ============= CREAR CITA =============
+    
+    /**
+     * GET /api/doctores/especialidad/{nombre}
+     * Obtiene doctores por especialidad
+     */
+    @GetMapping("/doctores/especialidad/{nombre}")
+    public ResponseEntity<?> obtenerDoctoresPorEspecialidad(@PathVariable String nombre) {
+        try {
+            List<Doctor> doctores = doctorRepository.findByEspecialidadNombre(nombre);
+            
+            List<Map<String, Object>> doctoresInfo = doctores.stream()
+                .map(doctor -> {
+                    Map<String, Object> info = new java.util.HashMap<>();
+                    info.put("id", doctor.getUsuarioId());
+                    info.put("nombre", doctor.getNombre());
+                    info.put("apellido", doctor.getApellido());
+                    info.put("nombreCompleto", doctor.getNombreCompleto());
+                    info.put("numeroLicencia", doctor.getNumeroLicencia());
+                    info.put("telefono", doctor.getTelefono() != null ? doctor.getTelefono() : "");
+                    info.put("especialidad", nombre);
+                    return info;
+                })
+                .toList();
+            
+            return ResponseEntity.ok(doctoresInfo);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "success", false,
+                "mensaje", "Error al obtener doctores: " + e.getMessage()
+            ));
+        }
+    }
+    
+    /**
+     * GET /api/citas/disponibles
+     * Obtiene horarios disponibles de un doctor en una fecha
+     */
+    @GetMapping("/disponibles")
+    public ResponseEntity<?> obtenerHorariosDisponibles(
+            @RequestParam Long doctorId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) {
+        try {
+            // Horarios estándar (de 8:00 AM a 6:00 PM, cada hora)
+            List<String> horariosEstandar = List.of(
+                "08:00", "09:00", "10:00", "11:00", "12:00",
+                "14:00", "15:00", "16:00", "17:00", "18:00"
+            );
+            
+            // Obtener las citas ya agendadas para ese doctor en esa fecha
+            java.time.LocalDateTime inicioDia = fecha.atStartOfDay();
+            java.time.LocalDateTime finDia = fecha.atTime(23, 59);
+            
+            Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+            if (!doctorOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                    "success", false,
+                    "mensaje", "Doctor no encontrado"
+                ));
+            }
+            
+            // Obtener citas ocupadas
+            List<Cita> citasOcupadas = citaRepository.findByDoctorAndFechaHoraBetween(
+                doctorOpt.get(), inicioDia, finDia
+            );
+            
+            // Extraer horas ocupadas (formato HH:mm)
+            List<String> horasOcupadas = citasOcupadas.stream()
+                .map(cita -> String.format("%02d:%02d", 
+                    cita.getFechaHora().getHour(), 
+                    cita.getFechaHora().getMinute()))
+                .toList();
+            
+            // Filtrar horarios disponibles
+            List<String> horariosDisponibles = horariosEstandar.stream()
+                .filter(horario -> !horasOcupadas.contains(horario))
+                .toList();
+            
+            return ResponseEntity.ok(horariosDisponibles);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                "success", false,
+                "mensaje", "Error al obtener horarios: " + e.getMessage()
+            ));
+        }
+    }
     
     /**
      * POST /api/citas

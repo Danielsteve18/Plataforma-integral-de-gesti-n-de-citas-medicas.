@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -134,9 +135,15 @@ public class AdminController {
     }
 
     @GetMapping("/doctores")
+    @Transactional(readOnly = true)
     public String doctores(Model model) {
         // Obtener todos los doctores con sus especialidades
         List<Doctor> doctores = doctorRepository.findAll();
+        
+        // Inicializar las especialidades para evitar LazyInitializationException
+        for (Doctor doctor : doctores) {
+            org.hibernate.Hibernate.initialize(doctor.getEspecialidades());
+        }
         
         // Obtener todas las especialidades disponibles
         List<Especialidad> especialidades = especialidadRepository.findAll();

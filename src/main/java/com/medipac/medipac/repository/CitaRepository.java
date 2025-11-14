@@ -45,6 +45,9 @@ public interface CitaRepository extends JpaRepository<Cita, Long> {
     @Query("SELECT COUNT(c) FROM Cita c WHERE c.doctor = :doctor AND c.fechaHora = :fechaHora AND c.estado IN ('PROGRAMADA', 'CONFIRMADA')")
     long countCitasEnHorario(@Param("doctor") Doctor doctor, @Param("fechaHora") LocalDateTime fechaHora);
     
+    // Buscar citas de un doctor en un rango de fechas
+    List<Cita> findByDoctorAndFechaHoraBetween(Doctor doctor, LocalDateTime inicio, LocalDateTime fin);
+    
     // Verificar conflictos de horario considerando duración
     @Query("SELECT COUNT(c) > 0 FROM Cita c WHERE c.doctor = :doctor " +
            "AND c.estado IN ('PROGRAMADA', 'CONFIRMADA') " +

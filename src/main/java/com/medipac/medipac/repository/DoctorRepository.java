@@ -30,7 +30,8 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     List<Doctor> findByEspecialidad(@Param("especialidad") Especialidad especialidad);
     
     // Buscar doctores por nombre de especialidad
-    @Query("SELECT d FROM Doctor d JOIN d.especialidades e WHERE LOWER(e.nombre) = LOWER(:nombreEspecialidad)")
+    @EntityGraph(attributePaths = {"especialidades"})
+    @Query("SELECT DISTINCT d FROM Doctor d JOIN d.especialidades e WHERE LOWER(e.nombre) = LOWER(:nombreEspecialidad)")
     List<Doctor> findByEspecialidadNombre(@Param("nombreEspecialidad") String nombreEspecialidad);
     
     // Buscar doctores disponibles (que tengan horarios disponibles)
