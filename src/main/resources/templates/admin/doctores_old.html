@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Gestión de Doctores - MediPac</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-volver {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-volver:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .doctores-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .doctor-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+        }
+
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .doctor-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .doctor-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-center: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 32px;
+        }
+
+        .doctor-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .doctor-license {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .especialidades-section {
+            margin-top: 15px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .especialidades-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            min-height: 32px;
+        }
+
+        .especialidad-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .no-especialidades {
+            color: #999;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .add-especialidad {
+            display: flex;
+            gap: 8px;
+        }
+
+        .select-especialidad {
+            flex: 1;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .btn-agregar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .no-doctores {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+        }
+
+        @media (max-width: 1200px) {
+            .doctores-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .doctores-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-user-md"></i>
+                Gestión de Doctores
+            </h1>
+            <a href="/admin/dashboard" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver
+            </a>
+        </div>
+
+        <div class="doctores-grid">
+            <div th:if="${doctores == null or #lists.isEmpty(doctores)}" class="no-doctores">
+                <i class="fas fa-user-md" style="font-size: 64px; color: #667eea; margin-bottom: 20px;"></i>
+                <h3>No hay doctores registrados</h3>
+                <p>Crea usuarios y cámbiales el rol a DOCTOR</p>
+            </div>
+
+            <div th:each="doctor : ${doctores}" class="doctor-card">
+                <div class="doctor-header">
+                    <div class="doctor-icon">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="doctor-name" th:text="${doctor.nombreCompleto}">Dr. Juan Pérez</div>
+                    <div class="doctor-license" th:text="${doctor.numeroLicencia}">LIC-12345</div>
+                </div>
+
+                <div class="especialidades-section">
+                    <div class="section-title">
+                        <i class="fas fa-stethoscope"></i> Especialidades
+                    </div>
+                    
+                    <div class="especialidades-list">
+                        <span th:if="${#lists.isEmpty(doctor.especialidades)}" class="no-especialidades">
+                            Sin especialidades
+                        </span>
+                        <div th:each="esp : ${doctor.especialidades}" class="especialidad-badge" th:text="${esp.nombre}">
+                            Medicina General
+                        </div>
+                    </div>
+
+                    <div class="add-especialidad">
+                        <select class="select-especialidad" th:id="'select-' + ${doctor.usuarioId}">
+                            <option value="">Agregar especialidad...</option>
+                            <option th:each="especialidad : ${especialidades}" 
+                                    th:value="${especialidad.id}" 
+                                    th:text="${especialidad.nombre}">
+                            </option>
+                        </select>
+                        <button class="btn-agregar" th:onclick="'agregarEspecialidad(' + ${doctor.usuarioId} + ')'">
+                            <i class="fas fa-plus"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function agregarEspecialidad(doctorId) {
+            const select = document.getElementById('select-' + doctorId);
+            const especialidadId = select.value;
+
+            if (!especialidadId) {
+                alert('Selecciona una especialidad');
+                return;
+            }
+
+            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            fetch('/admin/agregar-especialidad-doctor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({
+                    doctorId: doctorId,
+                    especialidadId: especialidadId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error al agregar especialidad');
+            });
+        }
+    </script>
+</body>
+</html>

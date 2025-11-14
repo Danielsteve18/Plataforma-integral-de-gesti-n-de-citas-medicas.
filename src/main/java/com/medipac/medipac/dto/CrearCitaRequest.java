@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  */
 public class CrearCitaRequest {
 
-    @NotNull(message = "El ID del paciente es obligatorio")
+    // Opcional: se puede obtener del usuario autenticado
     private Long pacienteId;
 
     @NotNull(message = "El ID del doctor es obligatorio")

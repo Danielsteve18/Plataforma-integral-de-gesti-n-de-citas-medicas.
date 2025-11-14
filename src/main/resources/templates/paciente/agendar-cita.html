@@ -194,16 +194,11 @@
                 </label>
                 <select id="especialidad" name="especialidad" required>
                     <option value="">Seleccione una especialidad...</option>
-                    <option value="Medicina General">Medicina General</option>
-                    <option value="Pediatría">Pediatría</option>
-                    <option value="Cardiología">Cardiología</option>
-                    <option value="Dermatología">Dermatología</option>
-                    <option value="Traumatología">Traumatología</option>
-                    <option value="Ginecología">Ginecología</option>
-                    <option value="Oftalmología">Oftalmología</option>
-                    <option value="Psiquiatría">Psiquiatría</option>
-                    <option value="Neurología">Neurología</option>
-                    <option value="Odontología">Odontología</option>
+                    <option th:each="esp : ${especialidades}" 
+                            th:value="${esp.nombre}" 
+                            th:text="${esp.nombre}">
+                        Especialidad
+                    </option>
                 </select>
             </div>
 
@@ -292,7 +287,12 @@
             }
 
             try {
-                const response = await fetch(`/api/doctores/especialidad/${especialidad}`);
+                const response = await fetch(`/api/citas/doctores/especialidad/${encodeURIComponent(especialidad)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const doctores = await response.json();
 
                 if (doctores.length === 0) {
@@ -379,12 +379,59 @@
             }
         });
 
-        // Validar formulario antes de enviar
-        document.getElementById('citaForm').addEventListener('submit', function(e) {
+        // Enviar formulario como JSON
+        document.getElementById('citaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
             if (!horarioInput.value) {
-                e.preventDefault();
                 alert('Por favor seleccione un horario');
                 return false;
+            }
+
+            const doctorId = document.getElementById('doctorId').value;
+            const fecha = document.getElementById('fecha').value;
+            const horario = horarioInput.value;
+            const motivo = document.getElementById('motivo').value;
+            const notas = document.getElementById('notas').value;
+
+            // Combinar fecha y hora en formato ISO
+            const fechaHora = `${fecha}T${horario}:00`;
+
+            const citaData = {
+                doctorId: parseInt(doctorId),
+                fechaHora: fechaHora,
+                motivo: motivo,
+                notas: notas || null
+            };
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+                const response = await fetch('/api/citas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [header]: token
+                    },
+                    body: JSON.stringify(citaData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Cita agendada exitosamente');
+                    window.location.href = '/paciente/mis-citas';
+                } else {
+                    alert('❌ Error: ' + (result.mensaje || 'No se pudo agendar la cita'));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-calendar-check"></i> Confirmar Cita';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al agendar la cita');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-calendar-check"></i> Confirmar Cita';
             }
         });
     </script>

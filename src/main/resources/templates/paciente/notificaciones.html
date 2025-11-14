@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones - MediPac</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%) !important;
+            min-height: 100vh;
+            padding: 1.5rem !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto !important;
+            padding: 0 1rem;
+        }
+        
+        .back-btn {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem !important;
+            padding: 0.75rem 1.5rem !important;
+            background: white !important;
+            color: rgb(30, 100, 180) !important;
+            border-radius: 10px;
+            text-decoration: none !important;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: 2px solid rgba(30, 100, 180, 0.2) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .back-btn:hover {
+            background: rgb(30, 100, 180) !important;
+            color: white !important;
+            transform: translateX(-3px);
+            box-shadow: 0 4px 12px rgba(30, 100, 180, 0.3);
+        }
+        
+        .header {
+            background: white !important;
+            border-radius: 15px;
+            padding: 2rem 1.5rem !important;
+            margin-bottom: 2rem !important;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border: 1px solid rgba(30, 100, 180, 0.1);
+        }
+        
+        .header h1 {
+            color: rgb(30, 100, 180) !important;
+            margin: 0 0 0.5rem 0 !important;
+            font-size: 1.8rem !important;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .header p {
+            color: #666 !important;
+            margin: 0 !important;
+            font-size: 0.95rem !important;
+        }
+        
+        h3 {
+            color: rgb(30, 100, 180) !important;
+            margin-bottom: 1.5rem !important;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid rgba(30, 100, 180, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem !important;
+        }
+        
+        .notificacion-card {
+            background: white !important;
+            border-radius: 12px;
+            padding: 1.5rem !important;
+            margin-bottom: 1.2rem !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid rgb(30, 100, 180) !important;
+            transition: all 0.3s;
+            border: 1px solid rgba(30, 100, 180, 0.1);
+        }
+        
+        .notificacion-card:hover {
+            transform: translateX(3px);
+            box-shadow: 0 5px 15px rgba(30, 100, 180, 0.15);
+        }
+        
+        .notificacion-card.urgente {
+            border-left-color: #dc3545 !important;
+            background: rgba(255, 250, 250, 1) !important;
+        }
+        
+        .notificacion-icon {
+            font-size: 1.3rem;
+        }
+        
+        .urgente .notificacion-icon {
+            color: #dc3545 !important;
+        }
+        
+        .normal .notificacion-icon {
+            color: rgb(30, 100, 180) !important;
+        }
+        
+        .notificacion-titulo {
+            color: #333 !important;
+            font-weight: 600;
+            font-size: 1rem !important;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        
+        .notificacion-fecha {
+            color: #999 !important;
+            font-size: 0.85rem !important;
+        }
+        
+        .notificacion-body {
+            color: #555 !important;
+            line-height: 1.7;
+            margin-top: 0.5rem;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.7rem !important;
+            font-size: 0.9rem;
+        }
+        
+        .info-row i {
+            width: 18px;
+            color: rgb(30, 100, 180) !important;
+            font-size: 0.95rem;
+        }
+        
+        .badge {
+            padding: 0.3rem 0.8rem !important;
+            border-radius: 12px;
+            font-size: 0.75rem !important;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-urgente {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .badge-proximo {
+            background: rgb(30, 100, 180) !important;
+            color: white !important;
+        }
+        
+        .no-notificaciones {
+            background: white !important;
+            border-radius: 15px;
+            padding: 3rem 2rem !important;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border: 1px solid rgba(30, 100, 180, 0.1);
+        }
+        
+        .no-notificaciones i {
+            font-size: 4rem !important;
+            color: rgb(30, 100, 180) !important;
+            opacity: 0.2;
+            margin-bottom: 1rem !important;
+            display: block;
+        }
+        
+        .no-notificaciones h3 {
+            color: rgb(30, 100, 180) !important;
+            margin-bottom: 0.8rem !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+        
+        .no-notificaciones p {
+            color: #666 !important;
+            margin: 0 !important;
+        }
+        
+        h3 {
+            color: rgb(30, 100, 180) !important;
+            margin-bottom: 1.5rem !important;
+            padding-bottom: 0.8rem;
+            border-bottom: 2px solid rgba(30, 100, 180, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem !important;
+        }
+        
+        .notificacion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem !important;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem !important;
+            }
+            
+            .header {
+                padding: 1.5rem !important;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .notificacion-card {
+                padding: 1.2rem !important;
+            }
+            
+            .notificacion-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a th:href="@{/paciente/dashboard}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+        </a>
+
+        <div class="header">
+            <h1><i class="fas fa-bell"></i> Notificaciones</h1>
+            <p>Recordatorios de tus próximas citas médicas</p>
+        </div>
+
+        <!-- Notificaciones Urgentes -->
+        <div th:if="${citasUrgentes != null && !citasUrgentes.isEmpty()}" style="margin-bottom: 2.5rem;">
+            <h3 style="color: rgb(30, 100, 180); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 2px solid rgba(30, 100, 180, 0.15); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-exclamation-triangle"></i> Citas Próximas (Próximos 3 días)
+            </h3>
+            <div class="notificacion-card urgente" th:each="cita : ${citasUrgentes}">
+                <div class="notificacion-header">
+                    <div class="notificacion-titulo">
+                        <i class="fas fa-calendar-exclamation notificacion-icon"></i>
+                        <span>Cita Programada</span>
+                        <span class="badge badge-urgente">URGENTE</span>
+                    </div>
+                </div>
+                <div class="notificacion-body">
+                    <div class="info-row">
+                        <i class="fas fa-clock"></i>
+                        <strong>Fecha:</strong>
+                        <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="info-row" th:if="${cita.doctor != null}">
+                        <i class="fas fa-user-md"></i>
+                        <strong>Doctor:</strong>
+                        <span th:text="${'Dr. ' + cita.doctor.nombre + ' ' + cita.doctor.apellido}"></span>
+                    </div>
+                    <div class="info-row" th:if="${cita.doctor != null && !cita.doctor.especialidades.isEmpty()}">
+                        <i class="fas fa-stethoscope"></i>
+                        <strong>Especialidad:</strong>
+                        <span th:text="${cita.doctor.especialidades.iterator().next().nombre}"></span>
+                    </div>
+                    <div class="info-row" th:if="${cita.motivo != null}">
+                        <i class="fas fa-comment-medical"></i>
+                        <strong>Motivo:</strong>
+                        <span th:text="${cita.motivo}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Otras Citas Próximas -->
+        <div th:if="${citasProximas != null && !citasProximas.isEmpty()}" style="margin-top: 2.5rem;">
+            <h3 style="color: rgb(30, 100, 180); margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 2px solid rgba(30, 100, 180, 0.15); display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-calendar-check"></i> Otras Citas Programadas
+            </h3>
+            <div class="notificacion-card normal" th:each="cita : ${citasProximas}">
+                <div class="notificacion-header">
+                    <div class="notificacion-titulo">
+                        <i class="fas fa-calendar-alt notificacion-icon"></i>
+                        <span>Cita Programada</span>
+                        <span class="badge badge-proximo">PRÓXIMA</span>
+                    </div>
+                </div>
+                <div class="notificacion-body">
+                    <div class="info-row">
+                        <i class="fas fa-clock"></i>
+                        <strong>Fecha:</strong>
+                        <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="info-row" th:if="${cita.doctor != null}">
+                        <i class="fas fa-user-md"></i>
+                        <strong>Doctor:</strong>
+                        <span th:text="${'Dr. ' + cita.doctor.nombre + ' ' + cita.doctor.apellido}"></span>
+                    </div>
+                    <div class="info-row" th:if="${cita.doctor != null && !cita.doctor.especialidades.isEmpty()}">
+                        <i class="fas fa-stethoscope"></i>
+                        <strong>Especialidad:</strong>
+                        <span th:text="${cita.doctor.especialidades.iterator().next().nombre}"></span>
+                    </div>
+                    <div class="info-row" th:if="${cita.motivo != null}">
+                        <i class="fas fa-comment-medical"></i>
+                        <strong>Motivo:</strong>
+                        <span th:text="${cita.motivo}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sin Notificaciones -->
+        <div class="no-notificaciones" th:if="${(citasProximas == null || citasProximas.isEmpty()) && (citasUrgentes == null || citasUrgentes.isEmpty())}">
+            <i class="fas fa-bell-slash"></i>
+            <h3>No tienes notificaciones</h3>
+            <p>Cuando tengas citas programadas, aparecerán aquí como recordatorios</p>
+        </div>
+    </div>
+</body>
+</html>

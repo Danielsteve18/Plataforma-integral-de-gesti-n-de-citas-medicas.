@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,8 @@ import com.medipac.medipac.repository.*;
 import com.medipac.medipac.service.CitaServiceMejorado;
 
 import jakarta.validation.Valid;
+import org.hibernate.Hibernate;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,9 @@ public class CitaRestController {
     
     @Autowired
     private UsuarioRepository usuarioRepository;
+    
+    @Autowired
+    private PacienteRepository pacienteRepository;
     
     @Autowired
     private CitaMapper citaMapper;
@@ -64,9 +70,15 @@ public class CitaRestController {
      * Obtiene doctores por especialidad
      */
     @GetMapping("/doctores/especialidad/{nombre}")
+    @Transactional
     public ResponseEntity<?> obtenerDoctoresPorEspecialidad(@PathVariable String nombre) {
         try {
+            System.out.println("🔍 Buscando doctores con especialidad: " + nombre);
             List<Doctor> doctores = doctorRepository.findByEspecialidadNombre(nombre);
+            System.out.println("✅ Doctores encontrados: " + doctores.size());
+            
+            // Inicializar la colección de especialidades para evitar LazyInitializationException
+            doctores.forEach(doctor -> Hibernate.initialize(doctor.getEspecialidades()));
             
             List<Map<String, Object>> doctoresInfo = doctores.stream()
                 .map(doctor -> {
@@ -78,12 +90,15 @@ public class CitaRestController {
                     info.put("numeroLicencia", doctor.getNumeroLicencia());
                     info.put("telefono", doctor.getTelefono() != null ? doctor.getTelefono() : "");
                     info.put("especialidad", nombre);
+                    System.out.println("  📋 Doctor: " + doctor.getNombreCompleto() + " (ID: " + doctor.getUsuarioId() + ")");
                     return info;
                 })
                 .toList();
             
             return ResponseEntity.ok(doctoresInfo);
         } catch (Exception e) {
+            System.err.println("❌ Error al obtener doctores: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                 "success", false,
                 "mensaje", "Error al obtener doctores: " + e.getMessage()
@@ -149,11 +164,32 @@ public class CitaRestController {
      * Crea una nueva cita médica
      */
     @PostMapping
+    @Transactional
     public ResponseEntity<?> crearCita(@Valid @RequestBody CrearCitaRequest request) {
         try {
+            // Si no se proporciona pacienteId, obtenerlo del usuario autenticado
+            if (request.getPacienteId() == null) {
+                String username = SecurityContextHolder.getContext().getAuthentication().getName();
+                Optional<Paciente> pacienteOpt = pacienteRepository.findByUsuarioUsername(username);
+                
+                if (!pacienteOpt.isPresent()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                        "success", false,
+                        "mensaje", "No se pudo identificar al paciente"
+                    ));
+                }
+                
+                request.setPacienteId(pacienteOpt.get().getUsuarioId());
+            }
+            
             CitaServiceMejorado.CitaResult result = citaService.crearCita(request);
             
             if (result.isExito()) {
+                // Inicializar la colección de especialidades del doctor para evitar LazyInitializationException
+                if (result.getCita() != null && result.getCita().getDoctor() != null) {
+                    Hibernate.initialize(result.getCita().getDoctor().getEspecialidades());
+                }
+                
                 CitaDTO citaDTO = citaMapper.toDTO(result.getCita());
                 return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
@@ -167,6 +203,7 @@ public class CitaRestController {
                 ));
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                 "success", false,
                 "mensaje", "Error interno del servidor: " + e.getMessage()

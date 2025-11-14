@@ -365,6 +365,7 @@ public class AdminController {
     
     @PostMapping("/agregar-especialidad-doctor")
     @ResponseBody
+    @Transactional
     public ResponseEntity<Map<String, Object>> agregarEspecialidadDoctor(@RequestBody Map<String, Object> request) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -376,6 +377,9 @@ public class AdminController {
             // Buscar el doctor
             Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor no encontrado"));
+            
+            // Inicializar la colección lazy
+            org.hibernate.Hibernate.initialize(doctor.getEspecialidades());
             
             // Buscar la especialidad
             Especialidad especialidad = especialidadRepository.findById(especialidadId)
@@ -404,6 +408,160 @@ public class AdminController {
             e.printStackTrace();
             response.put("success", false);
             response.put("message", "Error al agregar especialidad: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    // ========== GESTIÓN DE ESPECIALIDADES ==========
+    
+    @PostMapping("/crear-especialidad")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> crearEspecialidad(@RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String nombre = request.get("nombre");
+            String descripcion = request.get("descripcion");
+            
+            if (nombre == null || nombre.trim().isEmpty()) {
+                throw new RuntimeException("El nombre de la especialidad es obligatorio");
+            }
+            
+            // Verificar si ya existe
+            if (especialidadRepository.findByNombre(nombre).isPresent()) {
+                throw new RuntimeException("Ya existe una especialidad con ese nombre");
+            }
+            
+            Especialidad especialidad = new Especialidad();
+            especialidad.setNombre(nombre.trim());
+            especialidad.setDescripcion(descripcion != null ? descripcion.trim() : "");
+            
+            especialidadRepository.save(especialidad);
+            
+            response.put("success", true);
+            response.put("message", "Especialidad creada exitosamente");
+            response.put("especialidad", Map.of(
+                "id", especialidad.getId(),
+                "nombre", especialidad.getNombre(),
+                "descripcion", especialidad.getDescripcion()
+            ));
+            
+            System.out.println("✅ Especialidad creada: " + especialidad.getNombre());
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error al crear especialidad: " + e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    @PostMapping("/editar-especialidad")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> editarEspecialidad(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Long id = Long.valueOf(request.get("id").toString());
+            String nombre = request.get("nombre").toString();
+            String descripcion = request.get("descripcion").toString();
+            
+            Especialidad especialidad = especialidadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
+            
+            // Verificar si el nuevo nombre ya existe en otra especialidad
+            if (!especialidad.getNombre().equals(nombre)) {
+                if (especialidadRepository.findByNombre(nombre).isPresent()) {
+                    throw new RuntimeException("Ya existe una especialidad con ese nombre");
+                }
+            }
+            
+            especialidad.setNombre(nombre.trim());
+            especialidad.setDescripcion(descripcion != null ? descripcion.trim() : "");
+            
+            especialidadRepository.save(especialidad);
+            
+            response.put("success", true);
+            response.put("message", "Especialidad actualizada exitosamente");
+            
+            System.out.println("✅ Especialidad actualizada: " + especialidad.getNombre());
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error al editar especialidad: " + e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    @PostMapping("/eliminar-especialidad")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> eliminarEspecialidad(@RequestBody Map<String, Long> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Long id = request.get("id");
+            
+            Especialidad especialidad = especialidadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
+            
+            // Verificar si hay doctores con esta especialidad
+            List<Doctor> doctores = doctorRepository.findByEspecialidadNombre(especialidad.getNombre());
+            if (!doctores.isEmpty()) {
+                throw new RuntimeException("No se puede eliminar. Hay " + doctores.size() + " doctor(es) con esta especialidad");
+            }
+            
+            especialidadRepository.delete(especialidad);
+            
+            response.put("success", true);
+            response.put("message", "Especialidad eliminada exitosamente");
+            
+            System.out.println("✅ Especialidad eliminada: " + especialidad.getNombre());
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error al eliminar especialidad: " + e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+    
+    @PostMapping("/remover-especialidad-doctor")
+    @ResponseBody
+    @Transactional
+    public ResponseEntity<Map<String, Object>> removerEspecialidadDoctor(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Long doctorId = Long.valueOf(request.get("doctorId").toString());
+            Long especialidadId = Long.valueOf(request.get("especialidadId").toString());
+            
+            Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor no encontrado"));
+            
+            // Inicializar la colección lazy
+            org.hibernate.Hibernate.initialize(doctor.getEspecialidades());
+            
+            Especialidad especialidad = especialidadRepository.findById(especialidadId)
+                .orElseThrow(() -> new RuntimeException("Especialidad no encontrada"));
+            
+            // Verificar que el doctor tenga más de una especialidad
+            if (doctor.getEspecialidades().size() <= 1) {
+                throw new RuntimeException("El doctor debe tener al menos una especialidad");
+            }
+            
+            doctor.getEspecialidades().remove(especialidad);
+            doctorRepository.save(doctor);
+            
+            response.put("success", true);
+            response.put("message", "Especialidad removida exitosamente");
+            
+            System.out.println("✅ Especialidad removida del doctor");
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error al remover especialidad: " + e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil del Doctor - MediPac</title>
+    <link rel="stylesheet" th:href="@{/index.css}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .perfil-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(30, 100, 180, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .header-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid #f0f0f0;
+            flex-wrap: wrap;
+        }
+        .avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(30, 100, 180, 0.9), rgba(40, 120, 200, 0.8));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 5px 20px rgba(30, 100, 180, 0.3);
+        }
+        .doctor-info {
+            flex: 1;
+        }
+        .doctor-name {
+            font-size: 2rem;
+            color: rgb(30, 100, 180);
+            margin: 0 0 0.5rem 0;
+        }
+        .especialidades-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .especialidad-badge {
+            background: linear-gradient(135deg, rgba(30, 100, 180, 0.9), rgba(40, 120, 200, 0.8));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.8rem;
+            margin-top: 2.5rem;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(30, 100, 180, 0.9), rgba(40, 120, 200, 0.8));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+        }
+        .info-content strong {
+            display: block;
+            color: #999;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+        .info-content span {
+            color: #333;
+            font-size: 1.1rem;
+        }
+        .estadisticas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2.5rem;
+        }
+        .estadistica-card {
+            background: rgba(30, 100, 180, 0.05);
+            border: 1px solid rgba(30, 100, 180, 0.2);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .estadistica-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(30, 100, 180, 0.2);
+        }
+        .estadistica-card i {
+            font-size: 2.5rem;
+            color: rgb(30, 100, 180);
+            margin-bottom: 0.8rem;
+        }
+        .estadistica-numero {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin: 0.8rem 0;
+        }
+        .estadistica-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(30, 100, 180, 0.9), rgba(40, 120, 200, 0.8));
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(40, 120, 200, 1), rgba(60, 140, 220, 0.9));
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(30, 100, 180, 0.3);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: rgb(30, 100, 180);
+            border: 2px solid rgb(30, 100, 180);
+        }
+        .btn-secondary:hover {
+            background: rgb(30, 100, 180);
+            color: white;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(108, 117, 125, 0.9);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: rgba(108, 117, 125, 1);
+            transform: translateX(-5px);
+        }
+        .section-title {
+            color: rgb(30, 100, 180);
+            font-size: 1.3rem;
+            margin: 3rem 0 1.5rem 0;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(30, 100, 180, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a th:href="@{/paciente/buscar-doctores}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+
+        <div class="perfil-card">
+            <!-- Header con Avatar y Nombre -->
+            <div class="header-section">
+                <div class="avatar">
+                    <span th:text="${doctor.nombre.substring(0,1) + doctor.apellido.substring(0,1)}"></span>
+                </div>
+                <div class="doctor-info">
+                    <h1 class="doctor-name">
+                        Dr. <span th:text="${doctor.nombre + ' ' + doctor.apellido}"></span>
+                    </h1>
+                    <div class="especialidades-list">
+                        <span class="especialidad-badge" th:each="esp : ${doctor.especialidades}">
+                            <i class="fas fa-stethoscope"></i>
+                            <span th:text="${esp.nombre}"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Contacto -->
+            <h3 class="section-title">
+                <i class="fas fa-address-card"></i> Información de Contacto
+            </h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="info-content">
+                        <strong>Matrícula</strong>
+                        <span th:text="${doctor.numeroMatricula}"></span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="info-content">
+                        <strong>Teléfono</strong>
+                        <span th:text="${doctor.telefono}"></span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="info-content">
+                        <strong>Email</strong>
+                        <span th:text="${doctor.email}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <h3 class="section-title" th:if="${estadisticasDoctor != null}">
+                <i class="fas fa-chart-line"></i> Estadísticas
+            </h3>
+            <div class="estadisticas" th:if="${estadisticasDoctor != null}">
+                <div class="estadistica-card">
+                    <i class="fas fa-calendar-check"></i>
+                    <div class="estadistica-numero" th:text="${estadisticasDoctor.totalCitas}">0</div>
+                    <div class="estadistica-label">Total de Citas</div>
+                </div>
+                <div class="estadistica-card">
+                    <i class="fas fa-clock"></i>
+                    <div class="estadistica-numero" th:text="${estadisticasDoctor.citasPendientes}">0</div>
+                    <div class="estadistica-label">Citas Pendientes</div>
+                </div>
+                <div class="estadistica-card">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="estadistica-numero" th:text="${estadisticasDoctor.citasCompletadas}">0</div>
+                    <div class="estadistica-label">Citas Completadas</div>
+                </div>
+                <div class="estadistica-card">
+                    <i class="fas fa-users"></i>
+                    <div class="estadistica-numero" th:text="${estadisticasDoctor.pacientesAtendidos}">0</div>
+                    <div class="estadistica-label">Pacientes Atendidos</div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="action-buttons">
+                <a th:href="@{/paciente/agendar-cita(doctorId=${doctor.usuarioId})}" class="btn btn-primary">
+                    <i class="fas fa-calendar-plus"></i>
+                    Agendar Cita
+                </a>
+                <a th:href="@{/paciente/buscar-doctores}" class="btn btn-secondary">
+                    <i class="fas fa-search"></i>
+                    Buscar Otro Doctor
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

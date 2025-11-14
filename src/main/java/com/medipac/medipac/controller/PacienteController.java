@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -12,6 +13,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.medipac.medipac.model.*;
 import com.medipac.medipac.repository.*;
 import com.medipac.medipac.service.*;
+
+import org.hibernate.Hibernate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -90,7 +93,11 @@ public class PacienteController {
             return "redirect:/login?error=access_denied";
         }
         
+        // Cargar todas las especialidades disponibles
+        List<Especialidad> especialidades = especialidadRepository.findAll();
+        
         model.addAttribute("paciente", paciente);
+        model.addAttribute("especialidades", especialidades);
         
         return "paciente/agendar-cita";
     }
@@ -152,6 +159,7 @@ public class PacienteController {
     // ============= GESTIÓN DE CITAS =============
     
     @GetMapping("/mis-citas")
+    @Transactional
     public String verMisCitas(Model model) {
         Paciente paciente = getPacienteLogueado();
         if (paciente == null) {
@@ -160,6 +168,17 @@ public class PacienteController {
         
         // Obtener todas las citas del paciente
         List<Cita> citas = citaService.obtenerHistorialPaciente(paciente.getUsuarioId());
+        
+        // Inicializar las relaciones lazy para evitar LazyInitializationException
+        citas.forEach(cita -> {
+            if (cita.getDoctor() != null) {
+                Hibernate.initialize(cita.getDoctor());
+                Hibernate.initialize(cita.getDoctor().getEspecialidades());
+            }
+            if (cita.getPaciente() != null) {
+                Hibernate.initialize(cita.getPaciente());
+            }
+        });
         
         model.addAttribute("paciente", paciente);
         model.addAttribute("citas", citas);
@@ -217,6 +236,7 @@ public class PacienteController {
     // ============= HISTORIAL MÉDICO =============
     
     @GetMapping("/historial")
+    @Transactional
     public String verHistorialMedico(Model model) {
         Paciente paciente = getPacienteLogueado();
         if (paciente == null) {
@@ -224,6 +244,17 @@ public class PacienteController {
         }
         
         List<HistoriaClinica> historias = historiaClinicaService.obtenerHistorialPaciente(paciente.getUsuarioId());
+        
+        // Inicializar relaciones lazy
+        historias.forEach(historia -> {
+            if (historia.getCita() != null) {
+                Hibernate.initialize(historia.getCita());
+                if (historia.getCita().getDoctor() != null) {
+                    Hibernate.initialize(historia.getCita().getDoctor());
+                    Hibernate.initialize(historia.getCita().getDoctor().getEspecialidades());
+                }
+            }
+        });
         
         model.addAttribute("paciente", paciente);
         model.addAttribute("historias", historias);
@@ -300,6 +331,7 @@ public class PacienteController {
     // ============= BUSCAR DOCTORES Y ESPECIALIDADES =============
     
     @GetMapping("/buscar-doctores")
+    @Transactional
     public String buscarDoctores(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Long especialidadId,
@@ -313,16 +345,20 @@ public class PacienteController {
         List<Doctor> doctores = List.of();
         List<Especialidad> especialidades = especialidadRepository.findAll();
         
+        // Solo buscar doctores si hay algún criterio de búsqueda
         if (query != null && !query.trim().isEmpty()) {
             doctores = doctorRepository.findByNombreCompletoContaining(query);
+            // Inicializar especialidades
+            doctores.forEach(doctor -> Hibernate.initialize(doctor.getEspecialidades()));
         } else if (especialidadId != null) {
             Optional<Especialidad> especialidadOpt = especialidadRepository.findById(especialidadId);
             if (especialidadOpt.isPresent()) {
                 doctores = doctorRepository.findByEspecialidad(especialidadOpt.get());
+                // Inicializar especialidades
+                doctores.forEach(doctor -> Hibernate.initialize(doctor.getEspecialidades()));
             }
-        } else {
-            doctores = doctorRepository.findDoctoresDisponibles();
         }
+        // Si no hay query ni especialidadId, doctores queda vacío
         
         model.addAttribute("paciente", paciente);
         model.addAttribute("doctores", doctores);
@@ -334,6 +370,7 @@ public class PacienteController {
     }
     
     @GetMapping("/doctor/{doctorId}")
+    @Transactional
     public String verPerfilDoctor(@PathVariable Long doctorId, Model model) {
         Paciente paciente = getPacienteLogueado();
         if (paciente == null) {
@@ -346,6 +383,9 @@ public class PacienteController {
         }
         
         Doctor doctor = doctorOpt.get();
+        
+        // Inicializar especialidades del doctor
+        Hibernate.initialize(doctor.getEspecialidades());
         
         // Obtener estadísticas del doctor (si es público)
         CitaService.EstadisticasCitas estadisticasDoctor = citaService.obtenerEstadisticasDoctor(doctor.getUsuarioId());
@@ -360,6 +400,7 @@ public class PacienteController {
     // ============= NOTIFICACIONES Y RECORDATORIOS =============
     
     @GetMapping("/notificaciones")
+    @Transactional
     public String verNotificaciones(Model model) {
         Paciente paciente = getPacienteLogueado();
         if (paciente == null) {
@@ -368,6 +409,14 @@ public class PacienteController {
         
         // Obtener citas próximas como notificaciones
         List<Cita> citasProximas = citaService.obtenerProximasCitasPaciente(paciente.getUsuarioId());
+        
+        // Inicializar relaciones lazy
+        citasProximas.forEach(cita -> {
+            if (cita.getDoctor() != null) {
+                Hibernate.initialize(cita.getDoctor());
+                Hibernate.initialize(cita.getDoctor().getEspecialidades());
+            }
+        });
         
         // Filtrar citas para los próximos 3 días
         LocalDateTime limite = LocalDateTime.now().plusDays(3);

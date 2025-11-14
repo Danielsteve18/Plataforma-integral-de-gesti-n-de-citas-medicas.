@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Gestión de Doctores - MediPac</title>
+    <title>Gestión de Doctores y Especialidades - MediPac</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -22,7 +22,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -65,9 +65,156 @@
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ESPECIALIDADES */
+        .especialidades-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .especialidades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .especialidad-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 25px;
+            color: white;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .especialidad-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .especialidad-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .especialidad-card p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .especialidad-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-edit, .btn-delete {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .btn-edit:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-delete:hover {
+            background: rgba(255, 82, 82, 0.8);
+        }
+
+        /* DOCTORES */
         .doctores-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 25px;
         }
 
@@ -98,7 +245,7 @@
             border-radius: 50%;
             display: flex;
             align-items: center;
-            justify-center: center;
+            justify-content: center;
             margin: 0 auto 15px;
             color: white;
             font-size: 32px;
@@ -116,15 +263,18 @@
             color: #666;
         }
 
-        .especialidades-section {
+        .doctor-especialidades {
             margin-top: 15px;
         }
 
-        .section-title {
+        .subsection-title {
             font-size: 14px;
             font-weight: 600;
             color: #333;
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .especialidades-list {
@@ -138,10 +288,28 @@
         .especialidad-badge {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 6px 14px;
+            padding: 6px 12px 6px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .especialidad-badge button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .especialidad-badge button:hover {
+            background: rgba(255, 82, 82, 0.8);
         }
 
         .no-especialidades {
@@ -161,6 +329,12 @@
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 13px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .select-especialidad:focus {
+            border-color: #667eea;
         }
 
         .btn-agregar {
@@ -171,25 +345,183 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
         }
 
-        .no-doctores {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 60px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
+        .btn-agregar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        @media (max-width: 1200px) {
-            .doctores-grid {
-                grid-template-columns: repeat(2, 1fr);
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
             }
         }
 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .close-modal:hover {
+            color: #667eea;
+            transform: rotate(90deg);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-submit {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+        }
+
+        .no-items i {
+            font-size: 64px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
         @media (max-width: 768px) {
-            .doctores-grid {
+            .doctores-grid,
+            .especialidades-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
             }
         }
     </style>
@@ -199,7 +531,7 @@
         <div class="header">
             <h1>
                 <i class="fas fa-user-md"></i>
-                Gestión de Doctores
+                Gestión de Doctores y Especialidades
             </h1>
             <a href="/admin/dashboard" class="btn-volver">
                 <i class="fas fa-arrow-left"></i>
@@ -207,55 +539,316 @@
             </a>
         </div>
 
-        <div class="doctores-grid">
-            <div th:if="${doctores == null or #lists.isEmpty(doctores)}" class="no-doctores">
-                <i class="fas fa-user-md" style="font-size: 64px; color: #667eea; margin-bottom: 20px;"></i>
-                <h3>No hay doctores registrados</h3>
-                <p>Crea usuarios y cámbiales el rol a DOCTOR</p>
-            </div>
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('especialidades')">
+                <i class="fas fa-stethoscope"></i>
+                Especialidades Médicas
+            </button>
+            <button class="tab-button" onclick="switchTab('doctores')">
+                <i class="fas fa-user-md"></i>
+                Asignar Especialidades a Doctores
+            </button>
+        </div>
 
-            <div th:each="doctor : ${doctores}" class="doctor-card">
-                <div class="doctor-header">
-                    <div class="doctor-icon">
-                        <i class="fas fa-user-md"></i>
-                    </div>
-                    <div class="doctor-name" th:text="${doctor.nombreCompleto}">Dr. Juan Pérez</div>
-                    <div class="doctor-license" th:text="${doctor.numeroLicencia}">LIC-12345</div>
+        <!-- TAB: ESPECIALIDADES -->
+        <div id="especialidades-tab" class="tab-content active">
+            <div class="especialidades-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-stethoscope"></i>
+                        Especialidades Médicas Disponibles
+                    </h2>
+                    <button class="btn-primary" onclick="abrirModalCrear()">
+                        <i class="fas fa-plus"></i>
+                        Nueva Especialidad
+                    </button>
                 </div>
 
-                <div class="especialidades-section">
-                    <div class="section-title">
-                        <i class="fas fa-stethoscope"></i> Especialidades
-                    </div>
-                    
-                    <div class="especialidades-list">
-                        <span th:if="${#lists.isEmpty(doctor.especialidades)}" class="no-especialidades">
-                            Sin especialidades
-                        </span>
-                        <div th:each="esp : ${doctor.especialidades}" class="especialidad-badge" th:text="${esp.nombre}">
-                            Medicina General
-                        </div>
+                <div class="especialidades-grid">
+                    <div th:if="${especialidades == null or #lists.isEmpty(especialidades)}" class="no-items">
+                        <i class="fas fa-stethoscope"></i>
+                        <h3>No hay especialidades registradas</h3>
+                        <p>Crea la primera especialidad médica</p>
                     </div>
 
-                    <div class="add-especialidad">
-                        <select class="select-especialidad" th:id="'select-' + ${doctor.usuarioId}">
-                            <option value="">Agregar especialidad...</option>
-                            <option th:each="especialidad : ${especialidades}" 
-                                    th:value="${especialidad.id}" 
-                                    th:text="${especialidad.nombre}">
-                            </option>
-                        </select>
-                        <button class="btn-agregar" th:onclick="'agregarEspecialidad(' + ${doctor.usuarioId} + ')'">
-                            <i class="fas fa-plus"></i> Agregar
-                        </button>
+                    <div th:each="esp : ${especialidades}" class="especialidad-card">
+                        <h3>
+                            <i class="fas fa-stethoscope"></i>
+                            <span th:text="${esp.nombre}">Medicina General</span>
+                        </h3>
+                        <p th:text="${esp.descripcion}">Descripción de la especialidad</p>
+                        <div class="especialidad-actions">
+                            <button class="btn-edit" 
+                                    th:data-id="${esp.id}" 
+                                    th:data-nombre="${esp.nombre}" 
+                                    th:data-descripcion="${esp.descripcion}"
+                                    onclick="editarEspecialidadFromData(this)">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                            <button class="btn-delete" 
+                                    th:data-id="${esp.id}" 
+                                    th:data-nombre="${esp.nombre}"
+                                    onclick="eliminarEspecialidadFromData(this)">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: DOCTORES -->
+        <div id="doctores-tab" class="tab-content">
+            <div class="especialidades-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-user-md"></i>
+                        Asignar Especialidades a Doctores
+                    </h2>
+                </div>
+
+                <div class="doctores-grid">
+                    <div th:if="${doctores == null or #lists.isEmpty(doctores)}" class="no-items">
+                        <i class="fas fa-user-md"></i>
+                        <h3>No hay doctores registrados</h3>
+                        <p>Crea usuarios y cámbiales el rol a DOCTOR</p>
+                    </div>
+
+                    <div th:each="doctor : ${doctores}" class="doctor-card">
+                        <div class="doctor-header">
+                            <div class="doctor-icon">
+                                <i class="fas fa-user-md"></i>
+                            </div>
+                            <div class="doctor-name" th:text="${doctor.nombreCompleto}">Dr. Juan Pérez</div>
+                            <div class="doctor-license" th:text="${doctor.numeroLicencia}">LIC-12345</div>
+                        </div>
+
+                        <div class="doctor-especialidades">
+                            <div class="subsection-title">
+                                <i class="fas fa-stethoscope"></i> Especialidades Asignadas
+                            </div>
+                            
+                            <div class="especialidades-list">
+                                <span th:if="${#lists.isEmpty(doctor.especialidades)}" class="no-especialidades">
+                                    Sin especialidades asignadas
+                                </span>
+                                <div th:each="esp : ${doctor.especialidades}" class="especialidad-badge">
+                                    <span th:text="${esp.nombre}">Medicina General</span>
+                                    <button th:data-doctor-id="${doctor.usuarioId}" 
+                                            th:data-esp-id="${esp.id}" 
+                                            th:data-esp-nombre="${esp.nombre}"
+                                            onclick="removerEspecialidadFromData(this)" 
+                                            title="Quitar especialidad">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="add-especialidad">
+                                <select class="select-especialidad" th:id="'select-' + ${doctor.usuarioId}">
+                                    <option value="">+ Agregar especialidad...</option>
+                                    <option th:each="especialidad : ${especialidades}" 
+                                            th:value="${especialidad.id}" 
+                                            th:text="${especialidad.nombre}">
+                                    </option>
+                                </select>
+                                <button class="btn-agregar" th:data-doctor-id="${doctor.usuarioId}" onclick="agregarEspecialidadFromData(this)">
+                                    <i class="fas fa-plus"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- MODAL CREAR/EDITAR ESPECIALIDAD -->
+    <div id="modalEspecialidad" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">
+                    <i class="fas fa-stethoscope"></i>
+                    Nueva Especialidad
+                </h2>
+                <button class="close-modal" onclick="cerrarModal()">&times;</button>
+            </div>
+            
+            <form id="formEspecialidad">
+                <input type="hidden" id="especialidadId">
+                
+                <div class="form-group">
+                    <label for="especialidadNombre">
+                        <i class="fas fa-tag"></i> Nombre de la Especialidad *
+                    </label>
+                    <input type="text" id="especialidadNombre" required placeholder="Ej: Cardiología">
+                </div>
+                
+                <div class="form-group">
+                    <label for="especialidadDescripcion">
+                        <i class="fas fa-align-left"></i> Descripción
+                    </label>
+                    <textarea id="especialidadDescripcion" placeholder="Describe brevemente esta especialidad médica..."></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="cerrarModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        function agregarEspecialidad(doctorId) {
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        // TABS
+        function switchTab(tabName) {
+            // Ocultar todos los tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Mostrar tab seleccionado
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.closest('.tab-button').classList.add('active');
+        }
+
+        // MODAL
+        function abrirModalCrear() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Nueva Especialidad';
+            document.getElementById('especialidadId').value = '';
+            document.getElementById('especialidadNombre').value = '';
+            document.getElementById('especialidadDescripcion').value = '';
+            document.getElementById('modalEspecialidad').classList.add('active');
+        }
+
+        function editarEspecialidad(id, nombre, descripcion) {
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Especialidad';
+            document.getElementById('especialidadId').value = id;
+            document.getElementById('especialidadNombre').value = nombre;
+            document.getElementById('especialidadDescripcion').value = descripcion || '';
+            document.getElementById('modalEspecialidad').classList.add('active');
+        }
+
+        // Funciones que leen desde atributos data-*
+        function editarEspecialidadFromData(button) {
+            const id = button.dataset.id;
+            const nombre = button.dataset.nombre;
+            const descripcion = button.dataset.descripcion || '';
+            editarEspecialidad(id, nombre, descripcion);
+        }
+
+        function eliminarEspecialidadFromData(button) {
+            const id = button.dataset.id;
+            const nombre = button.dataset.nombre;
+            eliminarEspecialidad(id, nombre);
+        }
+
+        function agregarEspecialidadFromData(button) {
+            const doctorId = button.dataset.doctorId;
+            agregarEspecialidad(doctorId);
+        }
+
+        function removerEspecialidadFromData(button) {
+            const doctorId = button.dataset.doctorId;
+            const especialidadId = button.dataset.espId;
+            const nombreEsp = button.dataset.espNombre;
+            removerEspecialidad(doctorId, especialidadId, nombreEsp);
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalEspecialidad').classList.remove('active');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalEspecialidad').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+
+        // GUARDAR ESPECIALIDAD
+        document.getElementById('formEspecialidad').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('especialidadId').value;
+            const nombre = document.getElementById('especialidadNombre').value.trim();
+            const descripcion = document.getElementById('especialidadDescripcion').value.trim();
+
+            if (!nombre) {
+                alert('El nombre es obligatorio');
+                return;
+            }
+
+            const url = id ? '/admin/editar-especialidad' : '/admin/crear-especialidad';
+            const data = id ? { id, nombre, descripcion } : { nombre, descripcion };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    location.reload();
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al guardar la especialidad');
+            }
+        });
+
+        // ELIMINAR ESPECIALIDAD
+        async function eliminarEspecialidad(id, nombre) {
+            if (!confirm(`¿Seguro que deseas eliminar la especialidad "${nombre}"?\n\nSolo se puede eliminar si no hay doctores asignados.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/eliminar-especialidad', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({ id })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    location.reload();
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al eliminar la especialidad');
+            }
+        }
+
+        // AGREGAR ESPECIALIDAD A DOCTOR
+        async function agregarEspecialidad(doctorId) {
             const select = document.getElementById('select-' + doctorId);
             const especialidadId = select.value;
 
@@ -264,31 +857,64 @@
                 return;
             }
 
-            const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            try {
+                const response = await fetch('/admin/agregar-especialidad-doctor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({
+                        doctorId: doctorId,
+                        especialidadId: especialidadId
+                    })
+                });
 
-            fetch('/admin/agregar-especialidad-doctor', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    [csrfHeader]: csrfToken
-                },
-                body: JSON.stringify({
-                    doctorId: doctorId,
-                    especialidadId: especialidadId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Especialidad agregada');
                     location.reload();
                 } else {
-                    alert('Error: ' + data.message);
+                    alert('❌ ' + result.message);
                 }
-            })
-            .catch(error => {
-                alert('Error al agregar especialidad');
-            });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al agregar especialidad');
+            }
+        }
+
+        // REMOVER ESPECIALIDAD DE DOCTOR
+        async function removerEspecialidad(doctorId, especialidadId, nombreEsp) {
+            if (!confirm(`¿Quitar la especialidad "${nombreEsp}" de este doctor?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/remover-especialidad-doctor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({
+                        doctorId: doctorId,
+                        especialidadId: especialidadId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Especialidad removida');
+                    location.reload();
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al remover especialidad');
+            }
         }
     </script>
 </body>

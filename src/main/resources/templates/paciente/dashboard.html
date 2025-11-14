@@ -126,28 +126,28 @@
                 <i class="fas fa-file-medical"></i>
                 <h3>Historia Clínica</h3>
                 <p>Consulta tu historial médico, diagnósticos y prescripciones</p>
-                <a href="#" class="card-button">Ver Historia</a>
+                <a th:href="@{/paciente/historial}" class="card-button">Ver Historia</a>
             </div>
 
             <div class="dashboard-card">
                 <i class="fas fa-user-edit"></i>
                 <h3>Mi Perfil</h3>
                 <p>Actualiza tu información personal y datos de contacto</p>
-                <a href="#" class="card-button">Editar Perfil</a>
+                <a th:href="@{/paciente/perfil}" class="card-button">Editar Perfil</a>
             </div>
 
             <div class="dashboard-card">
                 <i class="fas fa-stethoscope"></i>
                 <h3>Especialistas</h3>
                 <p>Explora los diferentes especialistas y sus horarios disponibles</p>
-                <a href="#" class="card-button">Ver Doctores</a>
+                <a th:href="@{/paciente/buscar-doctores}" class="card-button">Ver Doctores</a>
             </div>
 
             <div class="dashboard-card">
                 <i class="fas fa-bell"></i>
                 <h3>Notificaciones</h3>
                 <p>Mantente al día con recordatorios y actualizaciones importantes</p>
-                <a href="#" class="card-button">Ver Notificaciones</a>
+                <a th:href="@{/paciente/notificaciones}" class="card-button">Ver Notificaciones</a>
             </div>
         </div>
     </div>

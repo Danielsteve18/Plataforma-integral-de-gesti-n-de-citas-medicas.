@@ -273,15 +273,15 @@
                     <div class="cita-details">
                         <div class="detail-item">
                             <i class="fas fa-calendar"></i>
-                            <span th:text="${#temporals.format(cita.fecha, 'dd/MM/yyyy')}">Fecha</span>
+                            <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">Fecha</span>
                         </div>
                         <div class="detail-item">
                             <i class="fas fa-clock"></i>
-                            <span th:text="${cita.horario}">Horario</span>
+                            <span th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">Horario</span>
                         </div>
-                        <div class="detail-item">
+                        <div class="detail-item" th:if="${cita.doctor != null && !cita.doctor.especialidades.isEmpty()}">
                             <i class="fas fa-stethoscope"></i>
-                            <span th:text="${cita.doctor.especialidad}">Especialidad</span>
+                            <span th:text="${cita.doctor.especialidades.iterator().next().nombre}">Especialidad</span>
                         </div>
                     </div>
 
@@ -290,9 +290,9 @@
                         <p th:text="${cita.motivo}">Motivo de consulta</p>
                     </div>
 
-                    <div th:if="${cita.notas}" class="cita-motivo">
-                        <strong>Notas:</strong>
-                        <p th:text="${cita.notas}">Notas adicionales</p>
+                    <div th:if="${cita.notasCancelacion != null && !cita.notasCancelacion.isEmpty()}" class="cita-motivo">
+                        <strong>Notas de cancelación:</strong>
+                        <p th:text="${cita.notasCancelacion}">Notas de cancelación</p>
                     </div>
 
                     <div class="cita-actions">

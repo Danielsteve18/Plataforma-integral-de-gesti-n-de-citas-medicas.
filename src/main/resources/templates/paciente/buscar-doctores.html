@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar Especialistas - MediPac</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%) !important;
+            min-height: 100vh;
+            padding: 1.5rem !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto !important;
+            padding: 0 1rem;
+        }
+        
+        .back-btn {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem !important;
+            padding: 0.75rem 1.5rem !important;
+            background: white !important;
+            color: rgb(30, 100, 180) !important;
+            border-radius: 10px;
+            text-decoration: none !important;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border: 2px solid rgba(30, 100, 180, 0.2) !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .back-btn:hover {
+            background: rgb(30, 100, 180) !important;
+            color: white !important;
+            transform: translateX(-3px);
+            box-shadow: 0 4px 12px rgba(30, 100, 180, 0.3);
+        }
+        
+        .header {
+            background: white !important;
+            border-radius: 15px;
+            padding: 2rem 1.5rem !important;
+            margin-bottom: 2rem !important;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border: 1px solid rgba(30, 100, 180, 0.1);
+        }
+        
+        .header h1 {
+            color: rgb(30, 100, 180) !important;
+            margin: 0 0 0.5rem 0 !important;
+            font-size: 1.8rem !important;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .header p {
+            color: #666 !important;
+            margin: 0 !important;
+            font-size: 0.95rem !important;
+        }
+        
+        .search-filters {
+            background: white !important;
+            border-radius: 15px;
+            padding: 2rem !important;
+            margin-bottom: 2rem !important;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border: 1px solid rgba(30, 100, 180, 0.1);
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1.2rem;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        
+        .filter-group label {
+            color: rgb(30, 100, 180) !important;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            padding: 0.8rem !important;
+            border: 2px solid rgba(30, 100, 180, 0.2) !important;
+            border-radius: 8px;
+            font-size: 0.95rem !important;
+            transition: all 0.3s;
+            background: white !important;
+        }
+        
+        .filter-group input::placeholder {
+            color: #999;
+            font-size: 0.9rem;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none !important;
+            border-color: rgb(30, 100, 180) !important;
+            box-shadow: 0 0 0 3px rgba(30, 100, 180, 0.1) !important;
+        }
+        
+        .btn-search {
+            padding: 0.8rem 2rem !important;
+            background: linear-gradient(135deg, rgb(30, 100, 180), rgb(40, 120, 200)) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .btn-search:hover {
+            background: linear-gradient(135deg, rgb(40, 120, 200), rgb(60, 140, 220)) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 100, 180, 0.3);
+        }
+        .especialidades-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(30, 100, 180, 0.1);
+            align-items: center;
+        }
+        .chips-label {
+            color: rgb(30, 100, 180);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 0.5rem;
+            white-space: nowrap;
+        }
+        .chip {
+            padding: 0.6rem 1.2rem;
+            background: rgba(30, 100, 180, 0.1);
+            border: 2px solid rgba(30, 100, 180, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            color: rgb(30, 100, 180);
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .chip:hover,
+        .chip.active {
+            background: rgb(30, 100, 180);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .doctores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .doctor-card {
+            background: white !important;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border: 1px solid rgba(30, 100, 180, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .doctor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(30, 100, 180, 0.15);
+        }
+        
+        .doctor-header {
+            background: linear-gradient(135deg, rgb(30, 100, 180), rgb(40, 120, 200)) !important;
+            color: white !important;
+            padding: 2rem 1.5rem !important;
+            text-align: center;
+        }
+        
+        .doctor-avatar {
+            width: 90px;
+            height: 90px;
+            background: white !important;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: rgb(30, 100, 180) !important;
+            font-weight: 700;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.2);
+        }
+        
+        .doctor-name {
+            margin: 0 !important;
+            font-size: 1.2rem !important;
+            font-weight: 600;
+        }
+        
+        .doctor-body {
+            padding: 1.5rem !important;
+        }
+        
+        .doctor-info {
+            margin-bottom: 1.2rem;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.7rem;
+            color: #555 !important;
+            font-size: 0.9rem;
+        }
+        
+        .info-row i {
+            color: rgb(30, 100, 180) !important;
+            width: 18px;
+            font-size: 0.95rem;
+        }
+        
+        .especialidades-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .especialidad-badge {
+            padding: 0.4rem 0.9rem !important;
+            background: linear-gradient(135deg, rgb(30, 100, 180), rgb(40, 120, 200)) !important;
+            color: white !important;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .doctor-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 0.75rem 1rem !important;
+            border: none !important;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none !important;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, rgb(30, 100, 180), rgb(40, 120, 200)) !important;
+            color: white !important;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgb(40, 120, 200), rgb(60, 140, 220)) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(30, 100, 180, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white !important;
+            color: rgb(30, 100, 180) !important;
+            border: 2px solid rgb(30, 100, 180) !important;
+        }
+        
+        .btn-secondary:hover {
+            background: rgb(30, 100, 180) !important;
+            color: white !important;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 3rem 2rem !important;
+            background: white !important;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border: 1px solid rgba(30, 100, 180, 0.1);
+        }
+        
+        .no-results i {
+            font-size: 4rem !important;
+            color: rgb(30, 100, 180) !important;
+            opacity: 0.2;
+            margin-bottom: 1rem !important;
+            display: block;
+        }
+        
+        .no-results h3 {
+            color: rgb(30, 100, 180) !important;
+            margin-bottom: 0.8rem !important;
+        }
+        
+        .no-results p {
+            color: #666 !important;
+            margin: 0 !important;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem !important;
+            }
+            
+            .header {
+                padding: 1.5rem !important;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem !important;
+                flex-direction: column;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .doctores-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .doctor-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a th:href="@{/paciente/dashboard}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+        </a>
+        
+        <div class="header">
+            <h1><i class="fas fa-user-md"></i> Buscar Especialistas</h1>
+            <p>Encuentra el médico especialista que necesitas</p>
+        </div>
+
+        <div class="search-filters">
+            <form method="get" th:action="@{/paciente/buscar-doctores}" id="searchForm">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="query">
+                            <i class="fas fa-search"></i> Buscar por nombre o apellido
+                        </label>
+                        <input type="text" 
+                               id="query" 
+                               name="query" 
+                               th:value="${query}"
+                               placeholder="Ej: Juan, Pérez, Rodríguez..."
+                               autocomplete="off">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="especialidadId">
+                            <i class="fas fa-stethoscope"></i> Filtrar por especialidad
+                        </label>
+                        <select id="especialidadId" name="especialidadId" onchange="this.form.submit()">
+                            <option value="">Todas las especialidades</option>
+                            <option th:each="esp : ${especialidades}" 
+                                    th:value="${esp.id}" 
+                                    th:text="${esp.nombre}"
+                                    th:selected="${esp.id == especialidadSeleccionada}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-search">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+
+                <!-- Chips de especialidades -->
+                <div class="especialidades-chips">
+                    <span class="chips-label">
+                        <i class="fas fa-filter"></i> Especialidades:
+                    </span>
+                    <a th:each="esp : ${especialidades}" 
+                       th:href="@{/paciente/buscar-doctores(especialidadId=${esp.id})}" 
+                       class="chip"
+                       th:classappend="${esp.id == especialidadSeleccionada ? 'active' : ''}"
+                       th:text="${esp.nombre}">
+                    </a>
+                </div>
+            </form>
+            
+            <!-- Contador de resultados -->
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
+                <p style="color: #666; font-size: 0.9rem; margin: 0;">
+                    <i class="fas fa-info-circle" style="color: rgb(30, 100, 180);"></i>
+                    <span th:if="${doctores != null && !doctores.isEmpty()}">
+                        Se encontraron <strong th:text="${doctores.size()}">0</strong> especialista(s)
+                        <span th:if="${query != null && !query.isEmpty()}">
+                            para "<strong th:text="${query}"></strong>"
+                        </span>
+                    </span>
+                    <span th:if="${(query != null && !query.isEmpty()) || especialidadSeleccionada != null}">
+                        <span th:if="${doctores == null || doctores.isEmpty()}">
+                            No se encontraron especialistas
+                            <span th:if="${query != null && !query.isEmpty()}"> para "<strong th:text="${query}"></strong>"</span>
+                        </span>
+                    </span>
+                    <span th:if="${(query == null || query.isEmpty()) && especialidadSeleccionada == null}">
+                        Utiliza el buscador o selecciona una especialidad para encontrar doctores
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Lista de Doctores -->
+        <div class="doctores-grid" th:if="${!doctores.isEmpty()}">
+            <div class="doctor-card" th:each="doctor : ${doctores}">
+                <div class="doctor-header">
+                    <div class="doctor-avatar">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h3 class="doctor-name" th:text="${'Dr. ' + doctor.nombre + ' ' + doctor.apellido}"></h3>
+                </div>
+
+                <div class="doctor-body">
+                    <div class="doctor-info">
+                        <div class="info-row">
+                            <i class="fas fa-id-card"></i>
+                            <span>Licencia: <strong th:text="${doctor.numeroLicencia}"></strong></span>
+                        </div>
+                        <div class="info-row" th:if="${doctor.telefono != null}">
+                            <i class="fas fa-phone"></i>
+                            <span th:text="${doctor.telefono}"></span>
+                        </div>
+                        <div class="info-row" th:if="${doctor.usuario != null}">
+                            <i class="fas fa-envelope"></i>
+                            <span th:text="${doctor.usuario.email}"></span>
+                        </div>
+                    </div>
+
+                    <div class="especialidades-list" th:if="${!doctor.especialidades.isEmpty()}">
+                        <span class="especialidad-badge" 
+                              th:each="esp : ${doctor.especialidades}"
+                              th:text="${esp.nombre}">
+                        </span>
+                    </div>
+
+                    <div class="doctor-actions">
+                        <a th:href="@{/paciente/agendar-cita}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus"></i> Agendar Cita
+                        </a>
+                        <a th:href="@{/paciente/doctor/{id}(id=${doctor.usuarioId})}" class="btn btn-secondary">
+                            <i class="fas fa-info-circle"></i> Ver Perfil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sin Resultados -->
+        <div class="no-results" th:if="${doctores.isEmpty()}">
+            <i class="fas fa-search"></i>
+            <h3>No se encontraron doctores</h3>
+            <p>Intenta con otros criterios de búsqueda</p>
+        </div>
+    </div>
+
+    <script>
+        // Búsqueda en tiempo real con debounce
+        let searchTimeout;
+        const queryInput = document.getElementById('query');
+        const searchForm = document.getElementById('searchForm');
+        
+        if (queryInput) {
+            queryInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                
+                const query = this.value.trim();
+                
+                // Si el campo está vacío, no hacer nada
+                if (query.length === 0) {
+                    return;
+                }
+                
+                // Esperar 500ms después de que el usuario deje de escribir
+                searchTimeout = setTimeout(function() {
+                    if (query.length >= 2) { // Buscar solo si hay al menos 2 caracteres
+                        searchForm.submit();
+                    }
+                }, 500);
+            });
+
+            // También permitir buscar con Enter
+            queryInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(searchTimeout);
+                    searchForm.submit();
+                }
+            });
+        }
+
+        // Añadir indicador visual de búsqueda activa
+        if (queryInput && queryInput.value.trim() !== '') {
+            queryInput.style.borderColor = 'rgb(40, 120, 200)';
+            queryInput.style.boxShadow = '0 0 0 3px rgba(40, 120, 200, 0.1)';
+        }
+    </script>
+</body>
+</html>
