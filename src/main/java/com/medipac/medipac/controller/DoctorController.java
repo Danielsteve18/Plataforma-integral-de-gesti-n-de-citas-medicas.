@@ -137,6 +137,7 @@ public class DoctorController {
     // ============= GESTIÓN DE CITAS =============
     
     @GetMapping("/mis-citas")
+    @Transactional
     public String verMisCitas(Model model) {
         Doctor doctor = getDoctorLogueado();
         if (doctor == null) {
@@ -145,6 +146,12 @@ public class DoctorController {
         
         // Obtener todas las citas del doctor
         List<Cita> citas = citaService.obtenerTodasCitasDoctor(doctor.getUsuarioId());
+        
+        // Inicializar pacientes y sus usuarios para evitar LazyInitializationException
+        citas.forEach(cita -> {
+            Hibernate.initialize(cita.getPaciente());
+            Hibernate.initialize(cita.getPaciente().getUsuario());
+        });
         
         // Calcular estadísticas
         Map<String, Long> stats = new HashMap<>();
@@ -158,6 +165,72 @@ public class DoctorController {
         model.addAttribute("stats", stats);
         
         return "doctor/mis-citas";
+    }
+    
+    @PostMapping("/cita/{id}/confirmar")
+    public String confirmarCita(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Doctor doctor = getDoctorLogueado();
+            if (doctor == null) {
+                return "redirect:/login?error=access_denied";
+            }
+            
+            CitaServiceMejorado.CitaResult result = citaService.confirmarCita(id, doctor.getUsuarioId());
+            
+            if (result.isExito()) {
+                redirectAttributes.addFlashAttribute("success", result.getMensaje());
+            } else {
+                redirectAttributes.addFlashAttribute("error", result.getMensaje());
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al confirmar la cita: " + e.getMessage());
+        }
+        
+        return "redirect:/doctor/mis-citas";
+    }
+    
+    @PostMapping("/cita/{id}/completar")
+    public String completarCita(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Doctor doctor = getDoctorLogueado();
+            if (doctor == null) {
+                return "redirect:/login?error=access_denied";
+            }
+            
+            CitaServiceMejorado.CitaResult result = citaService.completarCita(id, doctor.getUsuarioId());
+            
+            if (result.isExito()) {
+                redirectAttributes.addFlashAttribute("success", result.getMensaje());
+            } else {
+                redirectAttributes.addFlashAttribute("error", result.getMensaje());
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al completar la cita: " + e.getMessage());
+        }
+        
+        return "redirect:/doctor/mis-citas";
+    }
+    
+    @PostMapping("/cita/{id}/cancelar")
+    public String cancelarCita(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Doctor doctor = getDoctorLogueado();
+            if (doctor == null) {
+                return "redirect:/login?error=access_denied";
+            }
+            
+            CitaServiceMejorado.CitaResult result = citaService.cancelarCita(id, doctor.getUsuarioId(), "Cancelada por el doctor");
+            
+            if (result.isExito()) {
+                redirectAttributes.addFlashAttribute("success", result.getMensaje());
+            } else {
+                redirectAttributes.addFlashAttribute("error", result.getMensaje());
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al cancelar la cita: " + e.getMessage());
+        }
+        
+        return "redirect:/doctor/mis-citas";
     }
     
     @GetMapping("/citas")

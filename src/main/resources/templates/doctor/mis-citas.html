@@ -6,203 +6,476 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Mi Agenda - MediPac</title>
-    <link rel="stylesheet" th:href="@{/index.css}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%) !important;
+            min-height: 100vh;
+        }
+
         .agenda-container {
             max-width: 1400px;
             margin: 2rem auto;
             padding: 2rem;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%);
-            min-height: 100vh;
         }
+
         .agenda-header {
             text-align: center;
             margin-bottom: 2rem;
-            background: rgba(34, 139, 34, 0.1);
+            background: white !important;
             padding: 2rem;
             border-radius: 15px;
             border: 1px solid rgba(34, 139, 34, 0.2);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
         }
+
         .agenda-header h1 {
-            color: rgb(34, 139, 34);
+            color: rgb(34, 139, 34) !important;
             margin-bottom: 0.5rem;
+            font-size: 2rem;
         }
+
+        .agenda-header p {
+            color: rgb(50, 160, 50) !important;
+            font-size: 1.1rem;
+        }
+
         .back-btn {
-            display: inline-block;
-            margin-bottom: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
             padding: 0.8rem 1.5rem;
-            background: rgba(108, 117, 125, 0.9);
-            color: white;
+            background: white !important;
+            color: rgb(34, 139, 34) !important;
             text-decoration: none;
             border-radius: 8px;
+            border: 2px solid rgb(34, 139, 34);
             transition: all 0.3s ease;
+            font-weight: 500;
         }
+
         .back-btn:hover {
-            background: rgba(108, 117, 125, 1);
+            background: rgb(34, 139, 34) !important;
+            color: white !important;
             transform: translateX(-5px);
         }
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
+
         .stat-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: white !important;
             padding: 1.5rem;
             border-radius: 12px;
             text-align: center;
             border-left: 4px solid;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
         }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
         .stat-card.pendientes { border-color: #ffc107; }
-        .stat-card.confirmadas { border-color: #28a745; }
+        .stat-card.confirmadas { border-color: rgb(34, 139, 34); }
         .stat-card.completadas { border-color: #17a2b8; }
         .stat-card.canceladas { border-color: #dc3545; }
+
         .stat-number {
             font-size: 2.5rem;
             font-weight: 700;
             margin: 0.5rem 0;
         }
+
+        .stat-card.pendientes .stat-number { color: #ffc107; }
+        .stat-card.confirmadas .stat-number { color: rgb(34, 139, 34); }
+        .stat-card.completadas .stat-number { color: #17a2b8; }
+        .stat-card.canceladas .stat-number { color: #dc3545; }
+
         .stat-label {
-            color: #6c757d;
+            color: #6c757d !important;
             font-size: 0.9rem;
             text-transform: uppercase;
+            font-weight: 600;
         }
+
         .filters {
-            background: rgba(255, 255, 255, 0.95);
+            background: white !important;
             padding: 1.5rem;
             border-radius: 12px;
             margin-bottom: 2rem;
             display: flex;
             gap: 1rem;
             flex-wrap: wrap;
-            align-items: center;
+            align-items: end;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
+
         .filter-group {
             flex: 1;
             min-width: 200px;
         }
+
         .filter-group label {
             display: block;
             font-weight: 600;
-            color: rgb(34, 139, 34);
+            color: rgb(34, 139, 34) !important;
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
+
         .filter-group input,
         .filter-group select {
             width: 100%;
-            padding: 0.6rem;
-            border: 2px solid rgba(34, 139, 34, 0.3);
-            border-radius: 6px;
+            padding: 0.75rem;
+            border: 2px solid rgba(34, 139, 34, 0.2) !important;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            background: white !important;
         }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none !important;
+            border-color: rgb(34, 139, 34) !important;
+            box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1) !important;
+        }
+
         .citas-table {
-            background: rgba(255, 255, 255, 0.95);
+            background: white !important;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         thead {
-            background: rgb(34, 139, 34);
-            color: white;
+            background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50)) !important;
+            color: white !important;
         }
-        th, td {
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: white !important;
+        }
+
+        td {
             padding: 1rem;
             text-align: left;
         }
+
         tbody tr {
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             transition: background 0.2s ease;
         }
+
         tbody tr:hover {
-            background: rgba(34, 139, 34, 0.05);
+            background: rgba(34, 139, 34, 0.05) !important;
         }
+
         .estado-badge {
             padding: 0.4rem 0.8rem;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
             text-transform: uppercase;
+            display: inline-block;
         }
-        .estado-programada { background: #fff3cd; color: #856404; }
-        .estado-confirmada { background: #d4edda; color: #155724; }
-        .estado-completada { background: #d1ecf1; color: #0c5460; }
-        .estado-cancelada { background: #f8d7da; color: #721c24; }
+
+        .estado-badge.estado-programada { background: #fff3cd; color: #856404; }
+        .estado-badge.estado-confirmada { background: #d4edda; color: #155724; }
+        .estado-badge.estado-completada { background: #d1ecf1; color: #0c5460; }
+        .estado-badge.estado-cancelada { background: #f8d7da; color: #721c24; }
+
         .action-btns {
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
+            justify-content: center;
         }
-        .btn {
-            padding: 0.5rem 1rem;
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 1.2rem;
             transition: all 0.3s ease;
-            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            justify-content: center;
+            position: relative;
         }
+
+        .btn-icon::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .btn-icon:hover::after {
+            transform: translateX(-50%) scale(1);
+            opacity: 1;
+        }
+
         .btn-confirmar {
-            background: #28a745;
-            color: white;
+            background: rgb(34, 139, 34) !important;
+            color: white !important;
         }
+
         .btn-confirmar:hover {
-            background: #218838;
+            background: rgb(50, 160, 50) !important;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(34, 139, 34, 0.4);
         }
+
         .btn-completar {
-            background: #17a2b8;
-            color: white;
+            background: #17a2b8 !important;
+            color: white !important;
         }
+
         .btn-completar:hover {
-            background: #138496;
+            background: #138496 !important;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
         }
+
         .btn-cancelar {
-            background: #dc3545;
-            color: white;
+            background: #dc3545 !important;
+            color: white !important;
         }
+
         .btn-cancelar:hover {
-            background: #c82333;
+            background: #c82333 !important;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
         }
+
         .btn-detalle {
-            background: #6c757d;
+            background: #6c757d !important;
+            color: white !important;
+        }
+
+        .btn-detalle:hover {
+            background: #5a6268 !important;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
             color: white;
         }
-        .btn-detalle:hover {
-            background: #5a6268;
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
         }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .detail-row {
+            display: flex;
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: start;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: rgb(34, 139, 34);
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-value {
+            flex: 1;
+            color: #333;
+        }
+
+        .detail-value strong {
+            color: #000;
+        }
+
         .empty-state {
             text-align: center;
             padding: 3rem;
-            background: rgba(255, 255, 255, 0.9);
+            background: white !important;
             border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
+
         .empty-state i {
             font-size: 4rem;
             color: rgba(34, 139, 34, 0.3);
             margin-bottom: 1rem;
         }
+
+        .empty-state p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
         .alert {
-            padding: 1rem;
+            padding: 1rem 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
+
         .alert-success {
-            background: #d4edda;
-            color: #155724;
+            background: #d4edda !important;
+            color: #155724 !important;
             border: 1px solid #c3e6cb;
         }
+
         .alert-error {
-            background: #f8d7da;
-            color: #721c24;
+            background: #f8d7da !important;
+            color: #721c24 !important;
             border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .agenda-container {
+                padding: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                min-width: 100%;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .action-btns {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -281,12 +554,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="cita : ${citas}" th:attr="data-estado=${cita.estado}, data-fecha=${cita.fecha}">
-                        <td th:text="${#temporals.format(cita.fecha, 'dd/MM/yyyy')}">Fecha</td>
-                        <td th:text="${cita.horario}">Hora</td>
+                    <tr th:each="cita : ${citas}" th:attr="data-estado=${cita.estado}, data-fecha=${#temporals.format(cita.fechaHora, 'yyyy-MM-dd')}">
+                        <td th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">Fecha</td>
+                        <td th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">Hora</td>
                         <td>
                             <strong th:text="${cita.paciente.nombre} + ' ' + ${cita.paciente.apellido}">Paciente</strong><br>
-                            <small th:text="${cita.paciente.email}">email</small>
+                            <small th:text="${cita.paciente.usuario.email}" style="color: #6c757d;">email</small>
                         </td>
                         <td>
                             <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
@@ -300,40 +573,18 @@
                         </td>
                         <td>
                             <div class="action-btns">
-                                <!-- Confirmar cita si está programada -->
-                                <form th:if="${cita.estado == 'PROGRAMADA'}" 
-                                      th:action="@{/api/citas/{id}/confirmar(id=${cita.id})}" 
-                                      method="post" style="display: inline;">
-                                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                                    <button type="submit" class="btn btn-confirmar">
-                                        <i class="fas fa-check"></i> Confirmar
-                                    </button>
-                                </form>
-
-                                <!-- Completar cita si está confirmada -->
-                                <form th:if="${cita.estado == 'CONFIRMADA'}" 
-                                      th:action="@{/api/citas/{id}/completar(id=${cita.id})}" 
-                                      method="post" style="display: inline;">
-                                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                                    <button type="submit" class="btn btn-completar">
-                                        <i class="fas fa-check-double"></i> Completar
-                                    </button>
-                                </form>
-
-                                <!-- Cancelar cita si no está completada -->
-                                <form th:if="${cita.estado != 'COMPLETADA' and cita.estado != 'CANCELADA'}" 
-                                      th:action="@{/api/citas/{id}/cancelar(id=${cita.id})}" 
-                                      method="post" style="display: inline;">
-                                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                                    <button type="submit" class="btn btn-cancelar" 
-                                            onclick="return confirm('¿Cancelar esta cita?')">
-                                        <i class="fas fa-times"></i> Cancelar
-                                    </button>
-                                </form>
-
-                                <!-- Ver detalle -->
-                                <button class="btn btn-detalle" th:onclick="'verDetalle(' + ${cita.id} + ')'">
-                                    <i class="fas fa-eye"></i> Detalle
+                                <!-- Solo botón Ver Detalles - Las acciones están dentro del modal -->
+                                <button type="button" class="btn-icon btn-detalle" data-tooltip="Ver Detalles"
+                                        th:attr="data-cita-id=${cita.id},
+                                                 data-paciente=${cita.paciente.nombre + ' ' + cita.paciente.apellido},
+                                                 data-fecha=${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')},
+                                                 data-hora=${#temporals.format(cita.fechaHora, 'HH:mm')},
+                                                 data-motivo=${cita.motivo},
+                                                 data-estado=${cita.estado},
+                                                 data-email=${cita.paciente.usuario.email},
+                                                 data-telefono=${cita.paciente.telefono != null ? cita.paciente.telefono : 'No registrado'}"
+                                        onclick="verDetalleFromButton(this)">
+                                    <i class="fas fa-eye"></i>
                                 </button>
                             </div>
                         </td>
@@ -345,6 +596,108 @@
         <div class="empty-state" th:if="${citas == null or #lists.isEmpty(citas)}">
             <i class="fas fa-calendar-times"></i>
             <p>No hay citas registradas en tu agenda</p>
+        </div>
+    </div>
+
+    <!-- Modal de Detalles -->
+    <div id="modalDetalle" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-medical-alt"></i> Detalles de la Cita</h2>
+                <button class="modal-close" onclick="cerrarModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="fas fa-user"></i> Paciente:
+                    </div>
+                    <div class="detail-value">
+                        <strong id="detalle-paciente"></strong>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="fas fa-envelope"></i> Email:
+                    </div>
+                    <div class="detail-value" id="detalle-email"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="fas fa-phone"></i> Teléfono:
+                    </div>
+                    <div class="detail-value" id="detalle-telefono"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="fas fa-calendar"></i> Fecha:
+                    </div>
+                    <div class="detail-value">
+                        <strong id="detalle-fecha"></strong>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="fas fa-clock"></i> Hora:
+                    </div>
+                    <div class="detail-value">
+                        <strong id="detalle-hora"></strong>
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="fas fa-notes-medical"></i> Motivo:
+                    </div>
+                    <div class="detail-value" id="detalle-motivo"></div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">
+                        <i class="fas fa-info-circle"></i> Estado:
+                    </div>
+                    <div class="detail-value">
+                        <span class="estado-badge" id="detalle-estado-badge"></span>
+                    </div>
+                </div>
+
+                <!-- Botones de acción dentro del modal -->
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0; display: flex; gap: 1rem; justify-content: center;">
+                    <input type="hidden" id="detalle-cita-id" value="">
+                    <input type="hidden" id="detalle-cita-estado" value="">
+                    
+                    <!-- Botón Confirmar (solo si está PROGRAMADA) -->
+                    <button id="btn-modal-confirmar" type="button" 
+                            style="display: none; padding: 0.8rem 1.5rem; background: rgb(34, 139, 34); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s;"
+                            onmouseover="this.style.background='rgb(50, 160, 50)'; this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.background='rgb(34, 139, 34)'; this.style.transform='translateY(0)'">
+                        <i class="fas fa-check"></i> Confirmar Cita
+                    </button>
+
+                    <!-- Botón Completar (solo si está CONFIRMADA) -->
+                    <button id="btn-modal-completar" type="button"
+                            style="display: none; padding: 0.8rem 1.5rem; background: #17a2b8; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s;"
+                            onmouseover="this.style.background='#138496'; this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.background='#17a2b8'; this.style.transform='translateY(0)'">
+                        <i class="fas fa-check-double"></i> Completar Cita
+                    </button>
+
+                    <!-- Botón Cancelar (si no está completada) -->
+                    <button id="btn-modal-cancelar" type="button"
+                            style="display: none; padding: 0.8rem 1.5rem; background: #dc3545; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s;"
+                            onmouseover="this.style.background='#c82333'; this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.background='#dc3545'; this.style.transform='translateY(0)'">
+                        <i class="fas fa-times"></i> Cancelar Cita
+                    </button>
+
+                    <!-- Botón Cerrar -->
+                    <button type="button" onclick="cerrarModal()"
+                            style="padding: 0.8rem 1.5rem; background: #6c757d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s;"
+                            onmouseover="this.style.background='#5a6268'; this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.background='#6c757d'; this.style.transform='translateY(0)'">
+                        <i class="fas fa-arrow-left"></i> Cerrar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -377,10 +730,140 @@
             });
         }
 
-        function verDetalle(citaId) {
-            // Aquí puedes implementar un modal o redireccionar a una página de detalle
-            alert('Ver detalle de cita #' + citaId);
+        function verDetalleFromButton(button) {
+            // Obtener datos desde los atributos data del botón
+            const paciente = button.getAttribute('data-paciente');
+            const fecha = button.getAttribute('data-fecha');
+            const hora = button.getAttribute('data-hora');
+            const motivo = button.getAttribute('data-motivo');
+            const estado = button.getAttribute('data-estado');
+            const email = button.getAttribute('data-email');
+            const telefono = button.getAttribute('data-telefono');
+            const citaId = button.getAttribute('data-cita-id');
+            
+            verDetalle(citaId, paciente, fecha, hora, motivo, estado, email, telefono);
         }
+
+        function verDetalle(citaId, paciente, fecha, hora, motivo, estado, email, telefono) {
+            console.log('Estado de la cita:', estado); // Debug
+            
+            // Llenar los datos del modal
+            document.getElementById('detalle-paciente').textContent = paciente;
+            document.getElementById('detalle-email').textContent = email;
+            document.getElementById('detalle-telefono').textContent = telefono;
+            document.getElementById('detalle-fecha').textContent = fecha;
+            document.getElementById('detalle-hora').textContent = hora;
+            document.getElementById('detalle-motivo').textContent = motivo;
+            document.getElementById('detalle-cita-id').value = citaId;
+            document.getElementById('detalle-cita-estado').value = estado;
+            
+            // Badge de estado
+            const badge = document.getElementById('detalle-estado-badge');
+            badge.textContent = estado;
+            badge.className = 'estado-badge estado-' + estado.toLowerCase();
+            
+            // Ocultar todos los botones primero
+            const btnConfirmar = document.getElementById('btn-modal-confirmar');
+            const btnCompletar = document.getElementById('btn-modal-completar');
+            const btnCancelar = document.getElementById('btn-modal-cancelar');
+            
+            btnConfirmar.style.display = 'none';
+            btnCompletar.style.display = 'none';
+            btnCancelar.style.display = 'none';
+            
+            console.log('Verificando estado:', estado); // Debug
+            
+            // Mostrar botones según el estado
+            if (estado === 'PROGRAMADA') {
+                console.log('Mostrando botones para PROGRAMADA'); // Debug
+                btnConfirmar.style.display = 'inline-block';
+                btnCancelar.style.display = 'inline-block';
+            } else if (estado === 'CONFIRMADA') {
+                console.log('Mostrando botones para CONFIRMADA'); // Debug
+                btnCompletar.style.display = 'inline-block';
+                btnCancelar.style.display = 'inline-block';
+            } else {
+                console.log('Estado no requiere botones de acción:', estado); // Debug
+            }
+            
+            // Mostrar modal
+            document.getElementById('modalDetalle').classList.add('active');
+        }
+
+        // Función para confirmar cita desde el modal
+        document.getElementById('btn-modal-confirmar').addEventListener('click', function() {
+            const citaId = document.getElementById('detalle-cita-id').value;
+            if (confirm('¿Confirmar esta cita?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/doctor/cita/' + citaId + '/confirmar';
+                
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_csrf';
+                csrf.value = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                form.appendChild(csrf);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        // Función para completar cita desde el modal
+        document.getElementById('btn-modal-completar').addEventListener('click', function() {
+            const citaId = document.getElementById('detalle-cita-id').value;
+            if (confirm('¿Marcar esta cita como completada?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/doctor/cita/' + citaId + '/completar';
+                
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_csrf';
+                csrf.value = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                form.appendChild(csrf);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        // Función para cancelar cita desde el modal
+        document.getElementById('btn-modal-cancelar').addEventListener('click', function() {
+            const citaId = document.getElementById('detalle-cita-id').value;
+            if (confirm('¿Está seguro de cancelar esta cita?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/doctor/cita/' + citaId + '/cancelar';
+                
+                const csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = '_csrf';
+                csrf.value = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                form.appendChild(csrf);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+
+        function cerrarModal() {
+            document.getElementById('modalDetalle').classList.remove('active');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalDetalle').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+
+        // Cerrar modal con tecla ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModal();
+            }
+        });
     </script>
 </body>
 </html>
