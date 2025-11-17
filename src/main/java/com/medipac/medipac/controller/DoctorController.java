@@ -16,7 +16,7 @@ import com.medipac.medipac.service.*;
 import com.medipac.medipac.dto.CalendarioDTO;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +30,9 @@ public class DoctorController {
     private DoctorRepository doctorRepository;
     
     @Autowired
+    private PacienteRepository pacienteRepository;
+    
+    @Autowired
     private CitaService citaService;
     
     @Autowired
@@ -39,7 +42,13 @@ public class DoctorController {
     private UsuarioRepository usuarioRepository;
     
     @Autowired
+    private PrescripcionRepository prescripcionRepository;
+    
+    @Autowired
     private CalendarioService calendarioService;
+    
+    @Autowired
+    private DoctorPacienteFavoritoRepository favoritoRepository;
 
     // Helper method para obtener el doctor logueado
     private Doctor getDoctorLogueado() {
@@ -175,7 +184,7 @@ public class DoctorController {
                 return "redirect:/login?error=access_denied";
             }
             
-            CitaServiceMejorado.CitaResult result = citaService.confirmarCita(id, doctor.getUsuarioId());
+            CitaService.CitaResult result = citaService.confirmarCita(id, doctor.getUsuarioId());
             
             if (result.isExito()) {
                 redirectAttributes.addFlashAttribute("success", result.getMensaje());
@@ -197,7 +206,7 @@ public class DoctorController {
                 return "redirect:/login?error=access_denied";
             }
             
-            CitaServiceMejorado.CitaResult result = citaService.completarCita(id, doctor.getUsuarioId());
+            CitaService.CitaResult result = citaService.completarCita(id, doctor.getUsuarioId());
             
             if (result.isExito()) {
                 redirectAttributes.addFlashAttribute("success", result.getMensaje());
@@ -219,7 +228,7 @@ public class DoctorController {
                 return "redirect:/login?error=access_denied";
             }
             
-            CitaServiceMejorado.CitaResult result = citaService.cancelarCita(id, doctor.getUsuarioId(), "Cancelada por el doctor");
+            CitaService.CitaResult result = citaService.cancelarCita(id, doctor.getUsuarioId());
             
             if (result.isExito()) {
                 redirectAttributes.addFlashAttribute("success", result.getMensaje());
@@ -344,18 +353,107 @@ public class DoctorController {
     // ============= GESTIÓN DE HISTORIAS CLÍNICAS =============
     
     @GetMapping("/historias")
+    @Transactional
     public String verHistoriasClinicas(Model model) {
         Doctor doctor = getDoctorLogueado();
         if (doctor == null) {
             return "redirect:/login?error=access_denied";
         }
         
-        List<HistoriaClinica> historias = historiaClinicaService.obtenerHistoriasPorDoctor(doctor.getUsuarioId());
+        // Obtener todas las citas del doctor (aceptadas y rechazadas)
+        List<Cita> todasCitas = citaService.obtenerTodasCitasDoctor(doctor.getUsuarioId());
+        
+        // Inicializar pacientes
+        todasCitas.forEach(cita -> {
+            Hibernate.initialize(cita.getPaciente());
+            Hibernate.initialize(cita.getPaciente().getUsuario());
+        });
+        
+        // Obtener IDs de pacientes favoritos
+        List<Long> pacientesFavoritosIds = favoritoRepository.findPacienteIdsByDoctorId(doctor.getUsuarioId());
+        
+        // Agrupar pacientes únicos con sus citas
+        Map<Paciente, Map<String, Object>> pacientesConCitas = new HashMap<>();
+        
+        for (Cita cita : todasCitas) {
+            Paciente paciente = cita.getPaciente();
+            
+            if (!pacientesConCitas.containsKey(paciente)) {
+                Map<String, Object> info = new HashMap<>();
+                info.put("citasAceptadas", new ArrayList<Cita>());
+                info.put("citasRechazadas", new ArrayList<Cita>());
+                info.put("totalCitas", 0);
+                info.put("esFavorito", pacientesFavoritosIds.contains(paciente.getUsuarioId()));
+                pacientesConCitas.put(paciente, info);
+            }
+            
+            Map<String, Object> info = pacientesConCitas.get(paciente);
+            @SuppressWarnings("unchecked")
+            List<Cita> citasAceptadas = (List<Cita>) info.get("citasAceptadas");
+            @SuppressWarnings("unchecked")
+            List<Cita> citasRechazadas = (List<Cita>) info.get("citasRechazadas");
+            
+            if (cita.getEstado() == EstadoCita.CONFIRMADA || cita.getEstado() == EstadoCita.COMPLETADA) {
+                citasAceptadas.add(cita);
+            } else if (cita.getEstado() == EstadoCita.CANCELADA) {
+                citasRechazadas.add(cita);
+            }
+            
+            info.put("totalCitas", citasAceptadas.size() + citasRechazadas.size());
+        }
         
         model.addAttribute("doctor", doctor);
-        model.addAttribute("historias", historias);
+        model.addAttribute("pacientesConCitas", pacientesConCitas);
         
         return "doctor/historias";
+    }
+    
+    @GetMapping("/historias/paciente/{pacienteId}")
+    @Transactional
+    public String verHistoriasPaciente(@PathVariable Long pacienteId, Model model) {
+        Doctor doctor = getDoctorLogueado();
+        if (doctor == null) {
+            return "redirect:/login?error=access_denied";
+        }
+        
+        // Obtener el paciente por usuarioId
+        Optional<Paciente> pacienteOpt = pacienteRepository.findById(pacienteId);
+        if (!pacienteOpt.isPresent()) {
+            return "redirect:/doctor/historias?error=paciente_no_encontrado";
+        }
+        
+        Paciente paciente = pacienteOpt.get();
+        Hibernate.initialize(paciente.getUsuario());
+        
+        // Obtener todas las citas de este paciente con el doctor
+        List<Cita> todasCitas = citaService.obtenerTodasCitasDoctor(doctor.getUsuarioId()).stream()
+            .filter(c -> c.getPaciente().getUsuarioId().equals(pacienteId))
+            .collect(java.util.stream.Collectors.toList());
+        
+        // Separar citas aceptadas y rechazadas
+        List<Cita> citasAceptadas = todasCitas.stream()
+            .filter(c -> c.getEstado() == EstadoCita.CONFIRMADA || c.getEstado() == EstadoCita.COMPLETADA)
+            .collect(java.util.stream.Collectors.toList());
+            
+        List<Cita> citasRechazadas = todasCitas.stream()
+            .filter(c -> c.getEstado() == EstadoCita.CANCELADA)
+            .collect(java.util.stream.Collectors.toList());
+        
+        // Obtener historias clínicas del paciente con este doctor
+        List<HistoriaClinica> historias = historiaClinicaService.obtenerHistorialPacienteConDoctor(pacienteId, doctor.getUsuarioId());
+        
+        model.addAttribute("doctor", doctor);
+        model.addAttribute("paciente", paciente);
+        model.addAttribute("historias", historias);
+        model.addAttribute("citasAceptadas", citasAceptadas);
+        model.addAttribute("citasRechazadas", citasRechazadas);
+        
+        System.out.println("📊 Datos enviados a la vista:");
+        System.out.println("  - Historias: " + historias.size());
+        System.out.println("  - Citas Aceptadas: " + citasAceptadas.size());
+        System.out.println("  - Citas Rechazadas: " + citasRechazadas.size());
+        
+        return "doctor/historias-paciente";
     }
     
     @GetMapping("/historias/crear/{citaId}")
@@ -601,5 +699,274 @@ public class DoctorController {
         model.addAttribute("resultados", resultados);
         
         return "doctor/buscar";
+    }
+
+    // ============= GESTIÓN DE PRESCRIPCIONES =============
+    
+    @GetMapping("/prescripciones")
+    @Transactional
+    public String verPrescripciones(Model model) {
+        Doctor doctor = getDoctorLogueado();
+        if (doctor == null) {
+            return "redirect:/login?error=access_denied";
+        }
+        
+        // Obtener todas las prescripciones del doctor
+        List<Prescripcion> prescripciones = prescripcionRepository.findByDoctorId(doctor.getUsuarioId());
+        
+        // Inicializar relaciones de prescripciones
+        prescripciones.forEach(p -> {
+            Hibernate.initialize(p.getCita());
+            Hibernate.initialize(p.getCita().getPaciente());
+            Hibernate.initialize(p.getCita().getPaciente().getUsuario());
+        });
+        
+        // Obtener citas CONFIRMADAS (aceptadas) sin prescripción para completar
+        List<Cita> citasAceptadas = citaService.obtenerTodasCitasDoctor(doctor.getUsuarioId()).stream()
+            .filter(c -> c.getEstado() == EstadoCita.CONFIRMADA)
+            .filter(c -> prescripcionRepository.findByCitaId(c.getId()).isEmpty())
+            .collect(java.util.stream.Collectors.toList());
+        
+        // Inicializar relaciones de citas aceptadas
+        citasAceptadas.forEach(c -> {
+            Hibernate.initialize(c.getPaciente());
+            Hibernate.initialize(c.getPaciente().getUsuario());
+        });
+        
+        model.addAttribute("doctor", doctor);
+        model.addAttribute("prescripciones", prescripciones);
+        model.addAttribute("citasAceptadas", citasAceptadas);
+        
+        return "doctor/prescripciones";
+    }
+    
+    @PostMapping("/prescripciones/crear")
+    @Transactional
+    public String crearPrescripcion(
+            @RequestParam Long citaId,
+            @RequestParam String medicamentos,
+            @RequestParam String indicaciones,
+            @RequestParam String dosis,
+            @RequestParam String duracion,
+            @RequestParam(required = false) String notasPrescripcion,
+            RedirectAttributes redirectAttributes) {
+        
+        Doctor doctor = getDoctorLogueado();
+        if (doctor == null) {
+            return "redirect:/login?error=access_denied";
+        }
+        
+        try {
+            // Verificar que la cita existe y pertenece al doctor
+            Optional<Cita> citaOpt = citaService.obtenerTodasCitasDoctor(doctor.getUsuarioId()).stream()
+                .filter(c -> c.getId().equals(citaId))
+                .findFirst();
+            
+            if (!citaOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Cita no encontrada");
+                return "redirect:/doctor/prescripciones";
+            }
+            
+            Cita cita = citaOpt.get();
+            
+            // Validar que la cita esté confirmada (aceptada)
+            if (cita.getEstado() != EstadoCita.CONFIRMADA) {
+                redirectAttributes.addFlashAttribute("error", "Solo se pueden crear prescripciones para citas confirmadas");
+                return "redirect:/doctor/prescripciones";
+            }
+            
+            // Verificar que no exista ya una prescripción para esta cita
+            if (prescripcionRepository.findByCitaId(citaId).isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Ya existe una prescripción para esta cita");
+                return "redirect:/doctor/prescripciones";
+            }
+            
+            // Crear la prescripción
+            Prescripcion prescripcion = new Prescripcion();
+            prescripcion.setCita(cita);
+            prescripcion.setMedicamentos(medicamentos);
+            prescripcion.setIndicaciones(indicaciones);
+            prescripcion.setDosis(dosis);
+            prescripcion.setDuracion(duracion);
+            prescripcion.setNotas(notasPrescripcion);
+            
+            prescripcionRepository.save(prescripcion);
+            
+            redirectAttributes.addFlashAttribute("success", "Prescripción creada exitosamente");
+            redirectAttributes.addFlashAttribute("citaId", citaId);
+            redirectAttributes.addFlashAttribute("prescripcionId", prescripcion.getId());
+            redirectAttributes.addFlashAttribute("mostrarModalHistoria", true);
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al crear la prescripción: " + e.getMessage());
+        }
+        
+        return "redirect:/doctor/prescripciones";
+    }
+    
+    @PostMapping("/prescripciones/completar")
+    @Transactional
+    public String completarCitaConHistoria(
+            @RequestParam Long citaId,
+            @RequestParam Long prescripcionId,
+            @RequestParam String diagnostico,
+            @RequestParam(required = false) String prescripcionAdicional,
+            @RequestParam(required = false) String notasHistoria,
+            RedirectAttributes redirectAttributes) {
+        
+        Doctor doctor = getDoctorLogueado();
+        if (doctor == null) {
+            return "redirect:/login?error=access_denied";
+        }
+        
+        try {
+            // Obtener la prescripción
+            Optional<Prescripcion> prescripcionOpt = prescripcionRepository.findById(prescripcionId);
+            if (!prescripcionOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Prescripción no encontrada");
+                return "redirect:/doctor/prescripciones";
+            }
+            
+            Prescripcion prescripcion = prescripcionOpt.get();
+            
+            // Construir la prescripción completa
+            String prescripcionCompleta = "MEDICAMENTOS: " + prescripcion.getMedicamentos() + "\n\n" +
+                                         "DOSIS: " + prescripcion.getDosis() + "\n\n" +
+                                         "DURACIÓN: " + prescripcion.getDuracion() + "\n\n" +
+                                         "INDICACIONES: " + prescripcion.getIndicaciones();
+            
+            if (prescripcionAdicional != null && !prescripcionAdicional.trim().isEmpty()) {
+                prescripcionCompleta += "\n\nINFORMACIÓN ADICIONAL: " + prescripcionAdicional;
+            }
+            
+            // PRIMERO: Completar la cita (cambiar estado a COMPLETADA)
+            CitaService.CitaResult citaResult = citaService.completarCita(citaId, doctor.getUsuarioId());
+            if (!citaResult.isExito()) {
+                redirectAttributes.addFlashAttribute("error", "Error al completar la cita: " + citaResult.getMensaje());
+                return "redirect:/doctor/prescripciones";
+            }
+            
+            // SEGUNDO: Crear la historia clínica (ahora la cita ya está COMPLETADA)
+            HistoriaClinicaService.HistoriaResult result = historiaClinicaService.crearHistoriaClinica(
+                citaId, 
+                doctor.getUsuarioId(), 
+                diagnostico, 
+                prescripcionCompleta, 
+                notasHistoria != null ? notasHistoria : ""
+            );
+            
+            if (result.isExito()) {
+                redirectAttributes.addFlashAttribute("success", "Cita completada con historia clínica creada");
+            } else {
+                redirectAttributes.addFlashAttribute("error", result.getMensaje());
+            }
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al completar la cita: " + e.getMessage());
+        }
+        
+        return "redirect:/doctor/prescripciones";
+    }
+    
+    // ========== ENDPOINTS PARA FAVORITOS ==========
+    
+    @PostMapping("/favoritos/toggle/{pacienteId}")
+    @ResponseBody
+    public Map<String, Object> toggleFavorito(@PathVariable Long pacienteId) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Doctor doctor = getDoctorLogueado();
+            if (doctor == null) {
+                response.put("success", false);
+                response.put("message", "Doctor no autenticado");
+                return response;
+            }
+            
+            Optional<Paciente> pacienteOpt = pacienteRepository.findById(pacienteId);
+            if (!pacienteOpt.isPresent()) {
+                response.put("success", false);
+                response.put("message", "Paciente no encontrado");
+                return response;
+            }
+            
+            Paciente paciente = pacienteOpt.get();
+            
+            // Verificar si ya existe el favorito
+            Optional<DoctorPacienteFavorito> favoritoExistente = 
+                favoritoRepository.findByDoctorIdAndPacienteId(doctor.getUsuarioId(), pacienteId);
+            
+            if (favoritoExistente.isPresent()) {
+                // Eliminar de favoritos
+                favoritoRepository.delete(favoritoExistente.get());
+                response.put("success", true);
+                response.put("esFavorito", false);
+                response.put("message", "Paciente eliminado de favoritos");
+            } else {
+                // Agregar a favoritos
+                DoctorPacienteFavorito nuevoFavorito = new DoctorPacienteFavorito(doctor, paciente);
+                favoritoRepository.save(nuevoFavorito);
+                response.put("success", true);
+                response.put("esFavorito", true);
+                response.put("message", "Paciente agregado a favoritos");
+            }
+            
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error: " + e.getMessage());
+        }
+        
+        return response;
+    }
+    
+    @GetMapping("/mis-pacientes")
+    @Transactional
+    public String verMisPacientes(Model model) {
+        Doctor doctor = getDoctorLogueado();
+        if (doctor == null) {
+            return "redirect:/login?error=access_denied";
+        }
+        
+        // Obtener pacientes favoritos
+        List<DoctorPacienteFavorito> favoritos = favoritoRepository.findByDoctorId(doctor.getUsuarioId());
+        
+        // Inicializar y obtener información completa de cada paciente favorito
+        Map<Paciente, Map<String, Object>> pacientesFavoritos = new HashMap<>();
+        
+        for (DoctorPacienteFavorito favorito : favoritos) {
+            Paciente paciente = favorito.getPaciente();
+            Hibernate.initialize(paciente);
+            Hibernate.initialize(paciente.getUsuario());
+            
+            // Obtener citas del paciente con este doctor
+            List<Cita> citasDelPaciente = citaService.obtenerCitasPorPacienteYDoctor(
+                paciente.getUsuarioId(), 
+                doctor.getUsuarioId()
+            );
+            
+            Map<String, Object> info = new HashMap<>();
+            List<Cita> citasAceptadas = new ArrayList<>();
+            List<Cita> citasRechazadas = new ArrayList<>();
+            
+            for (Cita cita : citasDelPaciente) {
+                if (cita.getEstado() == EstadoCita.CONFIRMADA || cita.getEstado() == EstadoCita.COMPLETADA) {
+                    citasAceptadas.add(cita);
+                } else if (cita.getEstado() == EstadoCita.CANCELADA) {
+                    citasRechazadas.add(cita);
+                }
+            }
+            
+            info.put("citasAceptadas", citasAceptadas);
+            info.put("citasRechazadas", citasRechazadas);
+            info.put("totalCitas", citasAceptadas.size() + citasRechazadas.size());
+            info.put("esFavorito", true);
+            
+            pacientesFavoritos.put(paciente, info);
+        }
+        
+        model.addAttribute("doctor", doctor);
+        model.addAttribute("pacientesConCitas", pacientesFavoritos);
+        
+        return "doctor/mis-pacientes";
     }
 }

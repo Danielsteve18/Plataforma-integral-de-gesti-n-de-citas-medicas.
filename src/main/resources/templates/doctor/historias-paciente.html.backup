@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historias del Paciente - MediPac</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%) !important;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            background: white !important;
+            color: rgb(34, 139, 34) !important;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid rgb(34, 139, 34);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .back-btn:hover {
+            background: rgb(34, 139, 34) !important;
+            color: white !important;
+            transform: translateX(-5px);
+        }
+
+        .paciente-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .paciente-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .paciente-info h1 {
+            color: rgb(34, 139, 34);
+            margin-bottom: 0.5rem;
+        }
+
+        .paciente-info p {
+            color: #6c757d;
+            margin: 0.3rem 0;
+        }
+
+        .tabs-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: rgba(34, 139, 34, 0.05);
+            color: rgb(34, 139, 34);
+        }
+
+        .tab.active {
+            background: white;
+            color: rgb(34, 139, 34);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgb(34, 139, 34);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .item-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid rgb(34, 139, 34);
+            transition: all 0.3s;
+        }
+
+        .item-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .item-card.rechazada {
+            border-left-color: #dc3545;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: rgb(34, 139, 34);
+            font-size: 1.1rem;
+        }
+
+        .item-date {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .item-body {
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .item-body strong {
+            color: #212529;
+            display: block;
+            margin-top: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .estado-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .estado-badge.confirmada { background: #d4edda; color: #155724; }
+        .estado-badge.completada { background: #d1ecf1; color: #0c5460; }
+        .estado-badge.cancelada { background: #f8d7da; color: #721c24; }
+        .estado-badge.programada { background: #fff3cd; color: #856404; }
+
+        .empty-message {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-message i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: rgba(34, 139, 34, 0.3);
+        }
+
+        /* Scrollbar personalizado */
+        .tab-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .tab-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .tab-content::-webkit-scrollbar-thumb {
+            background: rgb(34, 139, 34);
+            border-radius: 10px;
+        }
+
+        .tab-content::-webkit-scrollbar-thumb:hover {
+            background: rgb(50, 160, 50);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .paciente-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                border-bottom: 1px solid #e9ecef;
+            }
+        }
+    </style>
+    <script type="text/javascript">
+        // Definir función globalmente ANTES de que se cargue el DOM
+        window.openTab = function(evt, tabName) {
+            console.log('🔄 Cambiando a tab:', tabName);
+            
+            var tabContents = document.querySelectorAll('.tab-content');
+            console.log('📋 Tabs encontrados:', tabContents.length);
+            tabContents.forEach(function(content) {
+                console.log('  - ID:', content.id);
+                content.classList.remove('active');
+                content.style.display = 'none';
+            });
+
+            var tabs = document.querySelectorAll('.tab');
+            tabs.forEach(function(tab) {
+                tab.classList.remove('active');
+            });
+
+            var selectedTab = document.getElementById(tabName);
+            console.log('🔍 Buscando tab con ID:', tabName, '- Encontrado:', !!selectedTab);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                selectedTab.style.display = 'block';
+                console.log('✅ Tab mostrado:', tabName);
+            } else {
+                console.error('❌ No se encontró el tab:', tabName);
+                console.log('📝 IDs disponibles en el documento:');
+                document.querySelectorAll('[id]').forEach(function(el) {
+                    console.log('  -', el.id);
+                });
+            }
+            
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 Página cargada, activando primer tab');
+            var firstTab = document.getElementById('historias');
+            if (firstTab) {
+                firstTab.classList.add('active');
+                firstTab.style.display = 'block';
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <a th:href="@{/doctor/historias}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Volver a Historias Clínicas
+        </a>
+
+        <!-- Header del Paciente -->
+        <div class="paciente-header">
+            <div class="paciente-avatar-large">
+                <span th:text="${#strings.substring(paciente.nombre, 0, 1)}">P</span>
+            </div>
+            <div class="paciente-info">
+                <h1 th:text="${paciente.nombre + ' ' + paciente.apellido}">Nombre del Paciente</h1>
+                <p><i class="fas fa-envelope"></i> <span th:text="${paciente.usuario.email}">email@example.com</span></p>
+                <p th:if="${paciente.telefono}"><i class="fas fa-phone"></i> <span th:text="${paciente.telefono}">Teléfono</span></p>
+                <p th:if="${paciente.fechaNacimiento}"><i class="fas fa-birthday-cake"></i> <span th:text="${#temporals.format(paciente.fechaNacimiento, 'dd/MM/yyyy')}">Fecha de Nacimiento</span></p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" onclick="openTab(event, 'historias')">
+                    <i class="fas fa-file-medical"></i> Historias Clínicas (<span th:text="${historias != null ? historias.size() : 0}">0</span>)
+                </button>
+                <button class="tab" onclick="openTab(event, 'aceptadas')">
+                    <i class="fas fa-check-circle"></i> Citas Aceptadas (<span th:text="${citasAceptadas != null ? citasAceptadas.size() : 0}">0</span>)
+                </button>
+                <button class="tab" onclick="openTab(event, 'rechazadas')">
+                    <i class="fas fa-times-circle"></i> Citas Rechazadas (<span th:text="${citasRechazadas != null ? citasRechazadas.size() : 0}">0</span>)
+                </button>
+            </div>
+
+            <!-- Tab Historias Clínicas -->
+            <div id="historias" class="tab-content active">
+                <div th:if="${historias != null and not #lists.isEmpty(historias)}">
+                    <div th:each="historia : ${historias}" class="item-card">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-title">Historia Clínica</div>
+                                <div class="item-date">
+                                    <i class="fas fa-calendar"></i> 
+                                    <span th:text="${#temporals.format(historia.fechaCreacion, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item-body">
+                            <strong><i class="fas fa-stethoscope"></i> Diagnóstico:</strong>
+                            <p th:text="${historia.diagnostico}">Diagnóstico</p>
+                            
+                            <strong><i class="fas fa-pills"></i> Prescripción:</strong>
+                            <p th:text="${historia.prescripcion}">Prescripción</p>
+                            
+                            <strong th:if="${historia.notas}"><i class="fas fa-notes-medical"></i> Notas:</strong>
+                            <p th:if="${historia.notas}" th:text="${historia.notas}">Notas adicionales</p>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${historias == null or #lists.isEmpty(historias)}" class="empty-message">
+                    <i class="fas fa-file-medical"></i>
+                    <p>No hay historias clínicas registradas para este paciente</p>
+                </div>
+            </div>
+
+            <!-- Tab Citas Aceptadas -->
+            <div id="aceptadas" class="tab-content">
+                <div th:if="${citasAceptadas != null and not #lists.isEmpty(citasAceptadas)}">
+                    <div th:each="cita : ${citasAceptadas}" class="item-card">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-title" th:text="${cita.motivo}">Motivo de la cita</div>
+                                <div class="item-date">
+                                    <i class="fas fa-calendar"></i> 
+                                    <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">Fecha</span>
+                                    <i class="fas fa-clock" style="margin-left: 1rem;"></i>
+                                    <span th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">Hora</span>
+                                </div>
+                            </div>
+                            <span class="estado-badge" 
+                                  th:classappend="${#strings.toLowerCase(cita.estado)}"
+                                  th:text="${cita.estado}">Estado</span>
+                        </div>
+                        <div class="item-body" th:if="${cita.notas}">
+                            <strong><i class="fas fa-comment"></i> Notas:</strong>
+                            <p th:text="${cita.notas}">Notas de la cita</p>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${citasAceptadas == null or #lists.isEmpty(citasAceptadas)}" class="empty-message">
+                    <i class="fas fa-check-circle"></i>
+                    <p>No hay citas aceptadas para este paciente</p>
+                </div>
+            </div>
+
+            <!-- Tab Citas Rechazadas -->
+            <div id="rechazadas" class="tab-content">
+                <div th:if="${citasRechazadas != null and not #lists.isEmpty(citasRechazadas)}">
+                    <div th:each="cita : ${citasRechazadas}" class="item-card rechazada">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-title" th:text="${cita.motivo}">Motivo de la cita</div>
+                                <div class="item-date">
+                                    <i class="fas fa-calendar"></i> 
+                                    <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">Fecha</span>
+                                    <i class="fas fa-clock" style="margin-left: 1rem;"></i>
+                                    <span th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">Hora</span>
+                                </div>
+                            </div>
+                            <span class="estado-badge cancelada">CANCELADA</span>
+                        </div>
+                        <div class="item-body" th:if="${cita.notas}">
+                            <strong><i class="fas fa-comment"></i> Notas:</strong>
+                            <p th:text="${cita.notas}">Notas de la cita</p>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${citasRechazadas == null or #lists.isEmpty(citasRechazadas)}" class="empty-message">
+                    <i class="fas fa-times-circle"></i>
+                    <p>No hay citas rechazadas para este paciente</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

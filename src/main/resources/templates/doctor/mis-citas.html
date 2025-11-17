@@ -522,12 +522,8 @@
         <div class="filters">
             <div class="filter-group">
                 <label><i class="fas fa-filter"></i> Estado</label>
-                <select id="filtroEstado" onchange="filtrarCitas()">
-                    <option value="">Todos</option>
-                    <option value="PROGRAMADA">Programadas</option>
-                    <option value="CONFIRMADA">Confirmadas</option>
-                    <option value="COMPLETADA">Completadas</option>
-                    <option value="CANCELADA">Canceladas</option>
+                <select id="filtroEstado" disabled style="cursor: not-allowed; opacity: 0.7;">
+                    <option value="" selected>Todos</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -661,40 +657,32 @@
                 </div>
 
                 <!-- Botones de acción dentro del modal -->
-                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0; display: flex; gap: 1rem; justify-content: center;">
+                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                     <input type="hidden" id="detalle-cita-id" value="">
                     <input type="hidden" id="detalle-cita-estado" value="">
                     
-                    <!-- Botón Confirmar (solo si está PROGRAMADA) -->
-                    <button id="btn-modal-confirmar" type="button" 
-                            style="display: none; padding: 0.8rem 1.5rem; background: rgb(34, 139, 34); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s;"
-                            onmouseover="this.style.background='rgb(50, 160, 50)'; this.style.transform='translateY(-2px)'"
-                            onmouseout="this.style.background='rgb(34, 139, 34)'; this.style.transform='translateY(0)'">
-                        <i class="fas fa-check"></i> Confirmar Cita
+                    <!-- Botón Aceptar (solo si está PROGRAMADA) -->
+                    <button id="btn-modal-aceptar" type="button" 
+                            style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50)); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(34, 139, 34, 0.3);"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(34, 139, 34, 0.4)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(34, 139, 34, 0.3)'">
+                        <i class="fas fa-check-circle"></i> Aceptar Cita
                     </button>
 
                     <!-- Botón Completar (solo si está CONFIRMADA) -->
                     <button id="btn-modal-completar" type="button"
-                            style="display: none; padding: 0.8rem 1.5rem; background: #17a2b8; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s;"
-                            onmouseover="this.style.background='#138496'; this.style.transform='translateY(-2px)'"
-                            onmouseout="this.style.background='#17a2b8'; this.style.transform='translateY(0)'">
+                            style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, #17a2b8, #138496); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(23, 162, 184, 0.3);"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(23, 162, 184, 0.4)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(23, 162, 184, 0.3)'">
                         <i class="fas fa-check-double"></i> Completar Cita
                     </button>
 
-                    <!-- Botón Cancelar (si no está completada) -->
-                    <button id="btn-modal-cancelar" type="button"
-                            style="display: none; padding: 0.8rem 1.5rem; background: #dc3545; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s;"
-                            onmouseover="this.style.background='#c82333'; this.style.transform='translateY(-2px)'"
-                            onmouseout="this.style.background='#dc3545'; this.style.transform='translateY(0)'">
-                        <i class="fas fa-times"></i> Cancelar Cita
-                    </button>
-
-                    <!-- Botón Cerrar -->
-                    <button type="button" onclick="cerrarModal()"
-                            style="padding: 0.8rem 1.5rem; background: #6c757d; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem; transition: all 0.3s;"
-                            onmouseover="this.style.background='#5a6268'; this.style.transform='translateY(-2px)'"
-                            onmouseout="this.style.background='#6c757d'; this.style.transform='translateY(0)'">
-                        <i class="fas fa-arrow-left"></i> Cerrar
+                    <!-- Botón Rechazar (solo si está PROGRAMADA o CONFIRMADA) -->
+                    <button id="btn-modal-rechazar" type="button"
+                            style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(220, 53, 69, 0.4)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(220, 53, 69, 0.3)'">
+                        <i class="fas fa-times-circle"></i> Rechazar Cita
                     </button>
                 </div>
             </div>
@@ -703,7 +691,6 @@
 
     <script>
         function filtrarCitas() {
-            const estado = document.getElementById('filtroEstado').value;
             const fechaDesde = document.getElementById('fechaDesde').value;
             const fechaHasta = document.getElementById('fechaHasta').value;
 
@@ -712,13 +699,9 @@
             filas.forEach(fila => {
                 let mostrar = true;
 
-                // Filtrar por estado
-                if (estado && fila.dataset.estado !== estado) {
-                    mostrar = false;
-                }
-
                 // Filtrar por fecha
                 const fechaCita = fila.dataset.fecha;
+                
                 if (fechaDesde && fechaCita < fechaDesde) {
                     mostrar = false;
                 }
@@ -745,7 +728,13 @@
         }
 
         function verDetalle(citaId, paciente, fecha, hora, motivo, estado, email, telefono) {
-            console.log('Estado de la cita:', estado); // Debug
+            console.log('=== INICIO verDetalle ===');
+            console.log('Estado de la cita:', estado);
+            console.log('Tipo de estado:', typeof estado);
+            
+            // Normalizar el estado a mayúsculas para la comparación
+            const estadoNormalizado = estado.toUpperCase();
+            console.log('Estado normalizado:', estadoNormalizado);
             
             // Llenar los datos del modal
             document.getElementById('detalle-paciente').textContent = paciente;
@@ -763,37 +752,47 @@
             badge.className = 'estado-badge estado-' + estado.toLowerCase();
             
             // Ocultar todos los botones primero
-            const btnConfirmar = document.getElementById('btn-modal-confirmar');
+            const btnAceptar = document.getElementById('btn-modal-aceptar');
             const btnCompletar = document.getElementById('btn-modal-completar');
-            const btnCancelar = document.getElementById('btn-modal-cancelar');
+            const btnRechazar = document.getElementById('btn-modal-rechazar');
             
-            btnConfirmar.style.display = 'none';
+            console.log('Botón Aceptar encontrado:', btnAceptar !== null);
+            console.log('Botón Completar encontrado:', btnCompletar !== null);
+            console.log('Botón Rechazar encontrado:', btnRechazar !== null);
+            
+            btnAceptar.style.display = 'none';
             btnCompletar.style.display = 'none';
-            btnCancelar.style.display = 'none';
+            btnRechazar.style.display = 'none';
             
-            console.log('Verificando estado:', estado); // Debug
+            console.log('Verificando estado para mostrar botones:', estadoNormalizado);
+            console.log('¿Es PROGRAMADA?', estadoNormalizado === 'PROGRAMADA');
+            console.log('¿Es CONFIRMADA?', estadoNormalizado === 'CONFIRMADA');
             
-            // Mostrar botones según el estado
-            if (estado === 'PROGRAMADA') {
-                console.log('Mostrando botones para PROGRAMADA'); // Debug
-                btnConfirmar.style.display = 'inline-block';
-                btnCancelar.style.display = 'inline-block';
-            } else if (estado === 'CONFIRMADA') {
-                console.log('Mostrando botones para CONFIRMADA'); // Debug
+            // Mostrar botones según el estado (usando estadoNormalizado)
+            if (estadoNormalizado === 'PROGRAMADA') {
+                console.log('✅ Mostrando botones ACEPTAR y RECHAZAR para PROGRAMADA');
+                btnAceptar.style.display = 'inline-block';
+                btnRechazar.style.display = 'inline-block';
+                console.log('Display de Aceptar:', btnAceptar.style.display);
+                console.log('Display de Rechazar:', btnRechazar.style.display);
+            } else if (estadoNormalizado === 'CONFIRMADA') {
+                console.log('✅ Mostrando botones COMPLETAR y RECHAZAR para CONFIRMADA');
                 btnCompletar.style.display = 'inline-block';
-                btnCancelar.style.display = 'inline-block';
+                btnRechazar.style.display = 'inline-block';
             } else {
-                console.log('Estado no requiere botones de acción:', estado); // Debug
+                console.log('ℹ️ Estado no requiere botones de acción:', estadoNormalizado);
             }
+            
+            console.log('=== FIN verDetalle ===');
             
             // Mostrar modal
             document.getElementById('modalDetalle').classList.add('active');
         }
 
-        // Función para confirmar cita desde el modal
-        document.getElementById('btn-modal-confirmar').addEventListener('click', function() {
+        // Función para aceptar cita desde el modal (confirmarla)
+        document.getElementById('btn-modal-aceptar').addEventListener('click', function() {
             const citaId = document.getElementById('detalle-cita-id').value;
-            if (confirm('¿Confirmar esta cita?')) {
+            if (confirm('¿Aceptar esta cita? La cita será confirmada.')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/doctor/cita/' + citaId + '/confirmar';
@@ -828,10 +827,10 @@
             }
         });
 
-        // Función para cancelar cita desde el modal
-        document.getElementById('btn-modal-cancelar').addEventListener('click', function() {
+        // Función para rechazar cita desde el modal (cancelarla)
+        document.getElementById('btn-modal-rechazar').addEventListener('click', function() {
             const citaId = document.getElementById('detalle-cita-id').value;
-            if (confirm('¿Está seguro de cancelar esta cita?')) {
+            if (confirm('¿Está seguro de rechazar esta cita? Esta acción cancelará la cita.')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/doctor/cita/' + citaId + '/cancelar';

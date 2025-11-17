@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Prescripciones - MediPac</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%) !important;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding: 0.8rem 1.5rem;
+            background: white !important;
+            color: rgb(34, 139, 34) !important;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 2px solid rgb(34, 139, 34);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .back-btn:hover {
+            background: rgb(34, 139, 34) !important;
+            color: white !important;
+            transform: translateX(-5px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+
+        .header h1 {
+            color: rgb(34, 139, 34);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: rgb(50, 160, 50);
+            font-size: 1.1rem;
+        }
+
+        .tabs-container {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: rgba(34, 139, 34, 0.05);
+            color: rgb(34, 139, 34);
+        }
+
+        .tab.active {
+            background: white;
+            color: rgb(34, 139, 34);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgb(34, 139, 34);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            color: rgb(34, 139, 34);
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid rgba(34, 139, 34, 0.2);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .filter-group input:focus {
+            outline: none;
+            border-color: rgb(34, 139, 34);
+            box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+        }
+
+        .prescripciones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .prescripcion-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid rgb(34, 139, 34);
+            transition: all 0.3s;
+        }
+
+        .prescripcion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .prescripcion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .prescripcion-paciente {
+            font-weight: 600;
+            color: rgb(34, 139, 34);
+            font-size: 1.1rem;
+        }
+
+        .prescripcion-fecha {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .prescripcion-body strong {
+            color: #212529;
+            display: block;
+            margin-top: 0.8rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .prescripcion-body p {
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .citas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .cita-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 4px solid #ffc107;
+            transition: all 0.3s;
+        }
+
+        .cita-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .cita-header {
+            margin-bottom: 1rem;
+        }
+
+        .cita-paciente {
+            font-weight: 600;
+            color: rgb(34, 139, 34);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cita-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin: 0.3rem 0;
+        }
+
+        .cita-motivo {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .btn-completar {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-completar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 139, 34, 0.4);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: rgba(34, 139, 34, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50));
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: white;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: rgb(34, 139, 34);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid rgba(34, 139, 34, 0.2);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgb(34, 139, 34);
+            box-shadow: 0 0 0 3px rgba(34, 139, 34, 0.1);
+        }
+
+        .form-group small {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(34, 139, 34, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .prescripciones-grid,
+            .citas-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a th:href="@{/doctor/dashboard}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+        </a>
+
+        <div class="header">
+            <h1><i class="fas fa-prescription-bottle-alt"></i> Prescripciones Médicas</h1>
+            <p>Gestiona prescripciones y completa citas con historias clínicas</p>
+        </div>
+
+        <!-- Mensajes -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" onclick="openTab(event, 'prescripciones')">
+                    <i class="fas fa-file-prescription"></i> Mis Prescripciones (<span th:text="${prescripciones != null ? prescripciones.size() : 0}">0</span>)
+                </button>
+                <button class="tab" onclick="openTab(event, 'citas')">
+                    <i class="fas fa-clipboard-list"></i> Citas Por Completar (<span th:text="${citasAceptadas != null ? citasAceptadas.size() : 0}">0</span>)
+                </button>
+            </div>
+
+            <!-- Tab Prescripciones -->
+            <div id="prescripciones" class="tab-content active">
+                <!-- Filtros -->
+                <div class="filters">
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar"></i> Fecha Desde</label>
+                        <input type="date" id="fechaDesdePrescripcion" onchange="filtrarPrescripciones()">
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-calendar"></i> Fecha Hasta</label>
+                        <input type="date" id="fechaHastaPrescripcion" onchange="filtrarPrescripciones()">
+                    </div>
+                </div>
+
+                <div th:if="${prescripciones != null and not #lists.isEmpty(prescripciones)}">
+                    <div class="prescripciones-grid">
+                        <div th:each="prescripcion : ${prescripciones}" 
+                             class="prescripcion-card"
+                             th:attr="data-fecha=${#temporals.format(prescripcion.fechaCreacion, 'yyyy-MM-dd')}">
+                            <div class="prescripcion-header">
+                                <div>
+                                    <div class="prescripcion-paciente">
+                                        <i class="fas fa-user"></i> 
+                                        <span th:text="${prescripcion.cita.paciente.nombre + ' ' + prescripcion.cita.paciente.apellido}">Paciente</span>
+                                    </div>
+                                    <div class="prescripcion-fecha">
+                                        <i class="fas fa-calendar"></i> 
+                                        <span th:text="${#temporals.format(prescripcion.fechaCreacion, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="prescripcion-body">
+                                <strong><i class="fas fa-pills"></i> Medicamentos:</strong>
+                                <p th:text="${prescripcion.medicamentos}">Medicamentos</p>
+                                
+                                <strong><i class="fas fa-syringe"></i> Dosis:</strong>
+                                <p th:text="${prescripcion.dosis}">Dosis</p>
+                                
+                                <strong><i class="fas fa-clock"></i> Duración:</strong>
+                                <p th:text="${prescripcion.duracion}">Duración</p>
+                                
+                                <strong><i class="fas fa-info-circle"></i> Indicaciones:</strong>
+                                <p th:text="${prescripcion.indicaciones}">Indicaciones</p>
+                                
+                                <div th:if="${prescripcion.notas}">
+                                    <strong><i class="fas fa-notes-medical"></i> Notas:</strong>
+                                    <p th:text="${prescripcion.notas}">Notas</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${prescripciones == null or #lists.isEmpty(prescripciones)}" class="empty-state">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                    <p>No hay prescripciones registradas</p>
+                </div>
+            </div>
+
+            <!-- Tab Citas -->
+            <div id="citas" class="tab-content">
+                <div th:if="${citasAceptadas != null and not #lists.isEmpty(citasAceptadas)}">
+                    <div class="citas-grid">
+                        <div th:each="cita : ${citasAceptadas}" class="cita-card">
+                            <div class="cita-header">
+                                <div class="cita-paciente">
+                                    <i class="fas fa-user"></i> 
+                                    <span th:text="${cita.paciente.nombre + ' ' + cita.paciente.apellido}">Paciente</span>
+                                </div>
+                                <div class="cita-info">
+                                    <i class="fas fa-calendar"></i> 
+                                    <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">Fecha</span>
+                                </div>
+                                <div class="cita-info">
+                                    <i class="fas fa-clock"></i> 
+                                    <span th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">Hora</span>
+                                </div>
+                                <div class="cita-info">
+                                    <i class="fas fa-envelope"></i> 
+                                    <span th:text="${cita.paciente.usuario.email}">Email</span>
+                                </div>
+                            </div>
+                            <div class="cita-motivo">
+                                <strong style="color: rgb(34, 139, 34);"><i class="fas fa-notes-medical"></i> Motivo:</strong>
+                                <p style="margin-top: 0.5rem;" th:text="${cita.motivo}">Motivo</p>
+                            </div>
+                            <button class="btn-completar" 
+                                    th:data-cita-id="${cita.id}" 
+                                    th:data-paciente-nombre="${cita.paciente.nombre + ' ' + cita.paciente.apellido}"
+                                    onclick="abrirModalPrescripcion(this.dataset.citaId, this.dataset.pacienteNombre)">
+                                <i class="fas fa-check-circle"></i> Completar Cita
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${citasAceptadas == null or #lists.isEmpty(citasAceptadas)}" class="empty-state">
+                    <i class="fas fa-clipboard-check"></i>
+                    <p>No hay citas por completar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Prescripción -->
+    <div id="modalPrescripcion" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-prescription"></i> Crear Prescripción</h2>
+                <button class="modal-close" onclick="cerrarModalPrescripcion()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="formPrescripcion" th:action="@{/doctor/prescripciones/crear}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="citaIdPrescripcion" name="citaId">
+                    
+                    <p style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                        <strong style="color: rgb(34, 139, 34);">Paciente:</strong> <span id="pacienteNombrePrescripcion"></span>
+                    </p>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-pills"></i> Medicamentos *</label>
+                        <textarea name="medicamentos" required placeholder="Ej: Ibuprofeno 400mg, Amoxicilina 500mg"></textarea>
+                        <small>Lista los medicamentos recetados</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-syringe"></i> Dosis *</label>
+                        <input type="text" name="dosis" required placeholder="Ej: 1 tableta cada 8 horas">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-clock"></i> Duración del Tratamiento *</label>
+                        <input type="text" name="duracion" required placeholder="Ej: 7 días, 2 semanas">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-info-circle"></i> Indicaciones *</label>
+                        <textarea name="indicaciones" required placeholder="Instrucciones de uso, advertencias, etc."></textarea>
+                        <small>Indicaciones especiales para el paciente</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-notes-medical"></i> Notas Adicionales</label>
+                        <textarea name="notasPrescripcion" placeholder="Notas opcionales"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalPrescripcion()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i> Continuar a Historia Clínica
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Historia Clínica -->
+    <div id="modalHistoria" class="modal" th:classappend="${mostrarModalHistoria} ? 'active' : ''">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-medical"></i> Completar Historia Clínica</h2>
+                <button class="modal-close" onclick="cerrarModalHistoria()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form th:action="@{/doctor/prescripciones/completar}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="citaId" th:value="${citaId}">
+                    <input type="hidden" name="prescripcionId" th:value="${prescripcionId}">
+                    
+                    <div class="alert alert-success" style="margin-bottom: 1.5rem;">
+                        <i class="fas fa-check-circle"></i> La prescripción se ha guardado. Complete la historia clínica para finalizar.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-stethoscope"></i> Diagnóstico *</label>
+                        <textarea name="diagnostico" required placeholder="Diagnóstico médico completo"></textarea>
+                        <small>Describe el diagnóstico del paciente</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-notes-medical"></i> Información Adicional de la Prescripción</label>
+                        <textarea name="prescripcionAdicional" placeholder="Información adicional sobre el tratamiento"></textarea>
+                        <small>Opcional: Agrega detalles extra sobre el tratamiento</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-clipboard"></i> Notas de la Historia Clínica</label>
+                        <textarea name="notasHistoria" placeholder="Observaciones, evolución, etc."></textarea>
+                        <small>Notas adicionales para el expediente médico</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModalHistoria()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check-double"></i> Completar Cita
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        function filtrarPrescripciones() {
+            const fechaDesde = document.getElementById('fechaDesdePrescripcion').value;
+            const fechaHasta = document.getElementById('fechaHastaPrescripcion').value;
+            const cards = document.querySelectorAll('.prescripcion-card');
+            
+            cards.forEach(card => {
+                let mostrar = true;
+                const fecha = card.getAttribute('data-fecha');
+                
+                if (fechaDesde && fecha < fechaDesde) mostrar = false;
+                if (fechaHasta && fecha > fechaHasta) mostrar = false;
+                
+                card.style.display = mostrar ? 'block' : 'none';
+            });
+        }
+
+        function abrirModalPrescripcion(citaId, pacienteNombre) {
+            document.getElementById('citaIdPrescripcion').value = citaId;
+            document.getElementById('pacienteNombrePrescripcion').textContent = pacienteNombre;
+            document.getElementById('modalPrescripcion').classList.add('active');
+        }
+
+        function cerrarModalPrescripcion() {
+            document.getElementById('modalPrescripcion').classList.remove('active');
+            document.getElementById('formPrescripcion').reset();
+        }
+
+        function cerrarModalHistoria() {
+            document.getElementById('modalHistoria').classList.remove('active');
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // Cerrar con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+            }
+        });
+
+        // Abrir modal de historia si hay flag
+        /*[# th:if="${mostrarModalHistoria}"]*/
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.getElementById('modalHistoria').classList.add('active');
+            }, 500);
+        });
+        /*[/]*/
+    </script>
+</body>
+</html>

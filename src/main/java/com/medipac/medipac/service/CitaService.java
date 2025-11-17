@@ -170,6 +170,22 @@ public class CitaService {
     }
     
     /**
+     * Obtener citas de un paciente específico con un doctor específico
+     */
+    public List<Cita> obtenerCitasPorPacienteYDoctor(Long pacienteId, Long doctorId) {
+        Optional<Paciente> pacienteOpt = pacienteRepository.findById(pacienteId);
+        Optional<Doctor> doctorOpt = doctorRepository.findById(doctorId);
+        
+        if (pacienteOpt.isPresent() && doctorOpt.isPresent()) {
+            return citaRepository.findByPacienteAndDoctorOrderByFechaHoraDesc(
+                pacienteOpt.get(), 
+                doctorOpt.get()
+            );
+        }
+        return List.of();
+    }
+    
+    /**
      * Obtener todas las citas del sistema (para administradores)
      */
     public List<Cita> obtenerTodasLasCitas() {
