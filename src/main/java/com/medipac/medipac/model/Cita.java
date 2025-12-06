@@ -255,6 +255,15 @@ public class Cita {
         return fechaHora.plusMinutes(duracionMinutos);
     }
 
+    // Métodos helper para templates
+    public java.time.LocalDate getFecha() {
+        return fechaHora != null ? fechaHora.toLocalDate() : null;
+    }
+
+    public java.time.LocalTime getHorario() {
+        return fechaHora != null ? fechaHora.toLocalTime() : null;
+    }
+
     @Override
     public String toString() {
         return "Cita{" +

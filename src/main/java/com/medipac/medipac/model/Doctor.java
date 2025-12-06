@@ -131,4 +131,17 @@ public class Doctor {
     public String getNombreCompleto() {
         return nombre + " " + apellido;
     }
+
+    // Método helper para obtener email
+    public String getEmail() {
+        return usuario != null ? usuario.getEmail() : null;
+    }
+
+    // Método helper para obtener la primera especialidad como string
+    public String getEspecialidad() {
+        if (especialidades != null && !especialidades.isEmpty()) {
+            return especialidades.iterator().next().getNombre();
+        }
+        return "Sin especialidad";
+    }
 }

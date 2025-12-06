@@ -286,21 +286,21 @@
                     </thead>
                     <tbody>
                         <tr th:each="cita : ${citas}" 
-                            th:attr="data-estado=${cita.estado}, data-fecha=${cita.fecha}, 
-                                     data-paciente=${cita.paciente.nombre + ' ' + cita.paciente.apellido}, 
-                                     data-doctor=${cita.doctor.nombre + ' ' + cita.doctor.apellido}">
+                            th:attr="data-estado=${cita.estado}, data-fecha=${cita.fecha != null ? #temporals.format(cita.fecha, 'yyyy-MM-dd') : ''}, 
+                                     data-paciente=${cita.paciente != null ? (cita.paciente.nombre + ' ' + cita.paciente.apellido) : ''}, 
+                                     data-doctor=${cita.doctor != null ? (cita.doctor.nombre + ' ' + cita.doctor.apellido) : ''}">
                             <td th:text="${cita.id}">1</td>
-                            <td th:text="${#temporals.format(cita.fecha, 'dd/MM/yyyy')}">Fecha</td>
-                            <td th:text="${cita.horario}">Hora</td>
+                            <td th:text="${cita.fecha != null ? #temporals.format(cita.fecha, 'dd/MM/yyyy') : 'N/A'}">Fecha</td>
+                            <td th:text="${cita.horario != null ? #temporals.format(cita.horario, 'HH:mm') : 'N/A'}">Hora</td>
                             <td>
-                                <strong th:text="${cita.paciente.nombre + ' ' + cita.paciente.apellido}">Paciente</strong><br>
-                                <small th:text="${cita.paciente.email}" style="color: #6c757d;">email</small>
+                                <strong th:text="${cita.paciente != null ? (cita.paciente.nombre + ' ' + cita.paciente.apellido) : 'N/A'}">Paciente</strong><br>
+                                <small th:text="${cita.paciente != null and cita.paciente.email != null ? cita.paciente.email : 'N/A'}" style="color: #6c757d;">email</small>
                             </td>
                             <td>
-                                <strong th:text="'Dr. ' + ${cita.doctor.nombre + ' ' + cita.doctor.apellido}">Doctor</strong><br>
-                                <small th:text="${cita.doctor.email}" style="color: #6c757d;">email</small>
+                                <strong th:text="${cita.doctor != null ? ('Dr. ' + cita.doctor.nombre + ' ' + cita.doctor.apellido) : 'N/A'}">Doctor</strong><br>
+                                <small th:text="${cita.doctor != null and cita.doctor.email != null ? cita.doctor.email : 'N/A'}" style="color: #6c757d;">email</small>
                             </td>
-                            <td th:text="${cita.doctor.especialidad}">Especialidad</td>
+                            <td th:text="${cita.doctor != null ? cita.doctor.especialidad : 'N/A'}">Especialidad</td>
                             <td>
                                 <div style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                     <span th:text="${cita.motivo}">Motivo</span>

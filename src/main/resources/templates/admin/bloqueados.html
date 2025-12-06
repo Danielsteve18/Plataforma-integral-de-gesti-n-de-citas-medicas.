@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Gestión de Usuarios Bloqueados - MediPac</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn-volver {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-volver:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .tab-button {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Filtros y Búsqueda */
+        .filters-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters-panel h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #343a40;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-item label {
+            font-weight: 600;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .filter-item input,
+        .filter-item select {
+            padding: 0.75rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .filter-item input:focus,
+        .filter-item select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Tabla de Usuarios */
+        .users-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #343a40;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .users-table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        .role-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .role-admin {
+            background: #dc3545;
+            color: white;
+        }
+
+        .role-doctor {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .role-paciente {
+            background: #28a745;
+            color: white;
+        }
+
+        .role-bloqueado {
+            background: #6c757d;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .no-items {
+            text-align: center;
+            padding: 60px;
+            color: #999;
+        }
+
+        .no-items i {
+            font-size: 64px;
+            color: #667eea;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-ban"></i>
+                Gestión de Usuarios Bloqueados
+            </h1>
+            <a href="/admin/dashboard" class="btn-volver">
+                <i class="fas fa-arrow-left"></i>
+                Volver
+            </a>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('activos')">
+                <i class="fas fa-users"></i>
+                Usuarios Activos (Bloquear)
+            </button>
+            <button class="tab-button" onclick="switchTab('bloqueados')">
+                <i class="fas fa-ban"></i>
+                Usuarios Bloqueados (Desbloquear)
+            </button>
+        </div>
+
+        <!-- TAB: USUARIOS ACTIVOS -->
+        <div id="activos-tab" class="tab-content active">
+            <div class="users-section">
+                <!-- Filtros y Búsqueda -->
+                <div class="filters-panel">
+                    <h3><i class="fas fa-filter"></i> Buscar y Filtrar Usuarios</h3>
+                    <div class="filters-grid">
+                        <div class="filter-item">
+                            <label><i class="fas fa-search"></i> Buscar</label>
+                            <input type="text" id="busquedaActivos" placeholder="Usuario, email..." onkeyup="filtrarUsuariosActivos()">
+                        </div>
+                        <div class="filter-item">
+                            <label><i class="fas fa-user-tag"></i> Filtrar por Rol</label>
+                            <select id="filtroRolActivos" onchange="filtrarUsuariosActivos()">
+                                <option value="">Todos los roles</option>
+                                <option value="PACIENTE">Paciente</option>
+                                <option value="DOCTOR">Doctor</option>
+                                <option value="ADMIN">Administrador</option>
+                                <option value="ADMINISTRADOR">Administrador</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Usuarios Activos -->
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-users"></i>
+                        Usuarios Activos
+                    </h2>
+                </div>
+
+                <div class="users-table-wrapper">
+                    <div th:if="${usuariosActivos != null and not #lists.isEmpty(usuariosActivos)}">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaActivos">
+                                <tr th:each="usuario : ${usuariosActivos}" 
+                                    th:attr="data-username=${usuario.username}, 
+                                             data-email=${usuario.email}, 
+                                             data-rol=${usuario.rol}">
+                                    <td th:text="${usuario.id}">1</td>
+                                    <td>
+                                        <div class="user-info">
+                                            <i class="fas fa-user-circle user-avatar"></i>
+                                            <span th:text="${usuario.username}">username</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${usuario.email}">email@example.com</td>
+                                    <td>
+                                        <span class="role-badge" 
+                                              th:classappend="${usuario.rol == 'ADMIN' or usuario.rol == 'ADMINISTRADOR'} ? 'role-admin' : 
+                                                             (${usuario.rol == 'DOCTOR'} ? 'role-doctor' : 
+                                                             (${usuario.rol == 'PACIENTE'} ? 'role-paciente' : 'role-bloqueado'))"
+                                              th:text="${usuario.rol}">ROL</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy')}">01/01/2024</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-danger" 
+                                                    th:data-usuario-id="${usuario.id}"
+                                                    th:data-username="${usuario.username}"
+                                                    onclick="bloquearUsuario(this)">
+                                                <i class="fas fa-ban"></i> Bloquear
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div th:if="${usuariosActivos == null or #lists.isEmpty(usuariosActivos)}" class="no-items">
+                        <i class="fas fa-users"></i>
+                        <h3>No hay usuarios activos</h3>
+                        <p>Todos los usuarios están bloqueados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: USUARIOS BLOQUEADOS -->
+        <div id="bloqueados-tab" class="tab-content">
+            <div class="users-section">
+                <!-- Filtros y Búsqueda -->
+                <div class="filters-panel">
+                    <h3><i class="fas fa-filter"></i> Buscar Usuarios Bloqueados</h3>
+                    <div class="filters-grid">
+                        <div class="filter-item">
+                            <label><i class="fas fa-search"></i> Buscar</label>
+                            <input type="text" id="busquedaBloqueados" placeholder="Usuario, email..." onkeyup="filtrarUsuariosBloqueados()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Usuarios Bloqueados -->
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-ban"></i>
+                        Usuarios Bloqueados
+                    </h2>
+                </div>
+
+                <div class="users-table-wrapper">
+                    <div th:if="${usuariosBloqueados != null and not #lists.isEmpty(usuariosBloqueados)}">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaBloqueados">
+                                <tr th:each="usuario : ${usuariosBloqueados}" 
+                                    th:attr="data-username=${usuario.username}, 
+                                             data-email=${usuario.email}">
+                                    <td th:text="${usuario.id}">1</td>
+                                    <td>
+                                        <div class="user-info">
+                                            <i class="fas fa-user-circle user-avatar"></i>
+                                            <span th:text="${usuario.username}">username</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${usuario.email}">email@example.com</td>
+                                    <td>
+                                        <span class="role-badge role-bloqueado" th:text="${usuario.rol}">BLOQUEADO</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy')}">01/01/2024</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-success" 
+                                                    th:data-usuario-id="${usuario.id}"
+                                                    th:data-username="${usuario.username}"
+                                                    onclick="desbloquearUsuario(this)">
+                                                <i class="fas fa-unlock"></i> Desbloquear
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div th:if="${usuariosBloqueados == null or #lists.isEmpty(usuariosBloqueados)}" class="no-items">
+                        <i class="fas fa-ban"></i>
+                        <h3>No hay usuarios bloqueados</h3>
+                        <p>Todos los usuarios están activos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Obtener tokens CSRF
+        const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        // Cambiar entre tabs
+        function switchTab(tabName) {
+            // Ocultar todos los tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remover active de todos los botones
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar el tab seleccionado
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Activar el botón correspondiente
+            event.target.classList.add('active');
+        }
+
+        // Filtrar usuarios activos
+        function filtrarUsuariosActivos() {
+            const busqueda = document.getElementById('busquedaActivos').value.toLowerCase();
+            const rol = document.getElementById('filtroRolActivos').value;
+            const filas = document.querySelectorAll('#tablaActivos tr');
+            
+            filas.forEach(fila => {
+                let mostrar = true;
+                
+                // Filtrar por búsqueda
+                if (busqueda) {
+                    const username = fila.dataset.username.toLowerCase();
+                    const email = fila.dataset.email.toLowerCase();
+                    if (!username.includes(busqueda) && !email.includes(busqueda)) {
+                        mostrar = false;
+                    }
+                }
+                
+                // Filtrar por rol
+                if (rol && fila.dataset.rol !== rol) {
+                    mostrar = false;
+                }
+                
+                fila.style.display = mostrar ? '' : 'none';
+            });
+        }
+
+        // Filtrar usuarios bloqueados
+        function filtrarUsuariosBloqueados() {
+            const busqueda = document.getElementById('busquedaBloqueados').value.toLowerCase();
+            const filas = document.querySelectorAll('#tablaBloqueados tr');
+            
+            filas.forEach(fila => {
+                let mostrar = true;
+                
+                // Filtrar por búsqueda
+                if (busqueda) {
+                    const username = fila.dataset.username.toLowerCase();
+                    const email = fila.dataset.email.toLowerCase();
+                    if (!username.includes(busqueda) && !email.includes(busqueda)) {
+                        mostrar = false;
+                    }
+                }
+                
+                fila.style.display = mostrar ? '' : 'none';
+            });
+        }
+
+        // Bloquear usuario
+        async function bloquearUsuario(button) {
+            const usuarioId = button.getAttribute('data-usuario-id');
+            const username = button.getAttribute('data-username');
+            
+            if (!confirm(`¿Estás seguro de bloquear al usuario "${username}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/cambiar-estado-ajax', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [header]: token
+                    },
+                    body: JSON.stringify({
+                        usuarioId: usuarioId,
+                        activo: false // false = bloquear
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Usuario bloqueado exitosamente');
+                    location.reload();
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al bloquear el usuario');
+            }
+        }
+
+        // Desbloquear usuario
+        async function desbloquearUsuario(button) {
+            const usuarioId = button.getAttribute('data-usuario-id');
+            const username = button.getAttribute('data-username');
+            
+            if (!confirm(`¿Estás seguro de desbloquear al usuario "${username}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/cambiar-estado-ajax', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [header]: token
+                    },
+                    body: JSON.stringify({
+                        usuarioId: usuarioId,
+                        activo: true // true = desbloquear
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Usuario desbloqueado exitosamente');
+                    location.reload();
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al desbloquear el usuario');
+            }
+        }
+    </script>
+</body>
+</html>

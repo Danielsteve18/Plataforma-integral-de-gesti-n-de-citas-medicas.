@@ -16,6 +16,7 @@ import com.medipac.medipac.service.*;
 import com.medipac.medipac.dto.CalendarioDTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -944,6 +945,13 @@ public class DoctorController {
                 doctor.getUsuarioId()
             );
             
+            // Inicializar relaciones lazy de las citas
+            citasDelPaciente.forEach(cita -> {
+                Hibernate.initialize(cita.getPaciente());
+                Hibernate.initialize(cita.getPaciente().getUsuario());
+                Hibernate.initialize(cita.getDoctor());
+            });
+            
             Map<String, Object> info = new HashMap<>();
             List<Cita> citasAceptadas = new ArrayList<>();
             List<Cita> citasRechazadas = new ArrayList<>();
@@ -968,5 +976,45 @@ public class DoctorController {
         model.addAttribute("pacientesConCitas", pacientesFavoritos);
         
         return "doctor/mis-pacientes";
+    }
+    
+    // ============= NOTIFICACIONES Y RECORDATORIOS =============
+    
+    @GetMapping("/notificaciones")
+    @Transactional
+    public String verNotificaciones(Model model) {
+        Doctor doctor = getDoctorLogueado();
+        if (doctor == null) {
+            return "redirect:/login?error=access_denied";
+        }
+        
+        // Obtener citas próximas como notificaciones
+        List<Cita> citasProximas = citaService.obtenerProximasCitasDoctor(doctor.getUsuarioId());
+        
+        // Inicializar relaciones lazy
+        citasProximas.forEach(cita -> {
+            if (cita.getPaciente() != null) {
+                Hibernate.initialize(cita.getPaciente());
+                Hibernate.initialize(cita.getPaciente().getUsuario());
+            }
+        });
+        
+        // Filtrar citas para los próximos 3 días
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime limite = ahora.plusDays(3);
+        List<Cita> citasUrgentes = citasProximas.stream()
+            .filter(c -> c.getFechaHora().isAfter(ahora) && c.getFechaHora().isBefore(limite))
+            .toList();
+        
+        // Obtener las demás citas (excluyendo las urgentes, solo las que están después de 3 días)
+        List<Cita> otrasCitasProximas = citasProximas.stream()
+            .filter(c -> c.getFechaHora().isAfter(ahora) && !c.getFechaHora().isBefore(limite))
+            .toList();
+        
+        model.addAttribute("doctor", doctor);
+        model.addAttribute("citasUrgentes", citasUrgentes);
+        model.addAttribute("citasProximas", otrasCitasProximas);
+        
+        return "doctor/notificaciones";
     }
 }

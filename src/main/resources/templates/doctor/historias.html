@@ -351,6 +351,8 @@
             event.stopPropagation();
             
             const pacienteId = button.getAttribute('data-paciente-id');
+            const card = button.closest('.paciente-card');
+            const nombrePaciente = card ? card.querySelector('h3')?.textContent || 'el paciente' : 'el paciente';
             
             fetch(`/doctor/favoritos/toggle/${pacienteId}`, {
                 method: 'POST',
@@ -364,19 +366,69 @@
                 if (data.success) {
                     if (data.esFavorito) {
                         button.classList.add('activo');
+                        // Mostrar mensaje de éxito
+                        mostrarNotificacion('✅ ' + data.message + '<br>Ahora puedes verlo en <strong>Mis Pacientes</strong>', 'success');
                     } else {
                         button.classList.remove('activo');
+                        mostrarNotificacion('ℹ️ ' + data.message, 'info');
                     }
                     console.log('✅ ' + data.message);
                 } else {
                     console.error('❌ ' + data.message);
-                    alert(data.message);
+                    mostrarNotificacion('❌ ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('❌ Error:', error);
-                alert('Error al actualizar favorito');
+                mostrarNotificacion('❌ Error al actualizar favorito', 'error');
             });
+        }
+        
+        function mostrarNotificacion(mensaje, tipo) {
+            // Crear elemento de notificación
+            const notificacion = document.createElement('div');
+            notificacion.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${tipo === 'success' ? '#28a745' : tipo === 'error' ? '#dc3545' : '#17a2b8'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                max-width: 400px;
+                font-size: 0.95rem;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notificacion.innerHTML = mensaje;
+            
+            // Agregar animación
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notificacion);
+            
+            // Remover después de 4 segundos
+            setTimeout(() => {
+                notificacion.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => {
+                    notificacion.remove();
+                    style.remove();
+                }, 300);
+            }, 4000);
         }
         
         function filtrarPacientes() {

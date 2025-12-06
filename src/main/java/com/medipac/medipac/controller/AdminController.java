@@ -55,23 +55,90 @@ public class AdminController {
         return auth != null ? auth.getName() : null;
     }
 
+    // Helper method para verificar que el usuario actual es admin
+    private boolean esAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+        
+        return auth.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || 
+                          a.getAuthority().equals("ROLE_ADMINISTRADOR"));
+    }
+
     @GetMapping("/dashboard")
+    @Transactional(readOnly = true)
     public String dashboard(Model model) {
         try {
             AdminService.AdminStats stats = adminService.obtenerEstadisticas();
-            List<Usuario> todosUsuarios = adminService.obtenerTodosLosUsuarios();
             
-            // Añadir conteo de citas totales al stats
+            // Obtener estadísticas de citas
+            Map<String, Long> citasStats = new HashMap<>();
             try {
                 List<Cita> todasCitas = citaService.obtenerTodasLasCitas();
                 stats.totalCitas = (long) (todasCitas != null ? todasCitas.size() : 0);
+                
+                if (todasCitas != null && !todasCitas.isEmpty()) {
+                    citasStats.put("total", (long) todasCitas.size());
+                    citasStats.put("pendientes", todasCitas.stream().filter(c -> c.getEstado() == EstadoCita.PROGRAMADA).count());
+                    citasStats.put("confirmadas", todasCitas.stream().filter(c -> c.getEstado() == EstadoCita.CONFIRMADA).count());
+                    citasStats.put("completadas", todasCitas.stream().filter(c -> c.getEstado() == EstadoCita.COMPLETADA).count());
+                    citasStats.put("canceladas", todasCitas.stream().filter(c -> c.getEstado() == EstadoCita.CANCELADA).count());
+                    
+                    // Obtener citas recientes (últimas 5)
+                    List<Cita> citasRecientes = todasCitas.stream()
+                        .sorted((c1, c2) -> c2.getFechaCreacion().compareTo(c1.getFechaCreacion()))
+                        .limit(5)
+                        .collect(java.util.stream.Collectors.toList());
+                    
+                    // Inicializar relaciones lazy para citas recientes
+                    for (Cita cita : citasRecientes) {
+                        if (cita.getPaciente() != null) {
+                            org.hibernate.Hibernate.initialize(cita.getPaciente());
+                            if (cita.getPaciente().getUsuario() != null) {
+                                org.hibernate.Hibernate.initialize(cita.getPaciente().getUsuario());
+                            }
+                        }
+                        if (cita.getDoctor() != null) {
+                            org.hibernate.Hibernate.initialize(cita.getDoctor());
+                            if (cita.getDoctor().getUsuario() != null) {
+                                org.hibernate.Hibernate.initialize(cita.getDoctor().getUsuario());
+                            }
+                        }
+                    }
+                    
+                    model.addAttribute("citasRecientes", citasRecientes);
+                } else {
+                    citasStats.put("total", 0L);
+                    citasStats.put("pendientes", 0L);
+                    citasStats.put("confirmadas", 0L);
+                    citasStats.put("completadas", 0L);
+                    citasStats.put("canceladas", 0L);
+                    model.addAttribute("citasRecientes", List.of());
+                }
             } catch (Exception e) {
                 stats.totalCitas = 0L;
+                citasStats.put("total", 0L);
+                citasStats.put("pendientes", 0L);
+                citasStats.put("confirmadas", 0L);
+                citasStats.put("completadas", 0L);
+                citasStats.put("canceladas", 0L);
+                model.addAttribute("citasRecientes", List.of());
             }
             
+            // Obtener usuarios recientes (últimos 5)
+            List<Usuario> usuariosRecientes = adminService.obtenerTodosLosUsuarios().stream()
+                .sorted((u1, u2) -> u2.getFechaCreacion().compareTo(u1.getFechaCreacion()))
+                .limit(5)
+                .collect(java.util.stream.Collectors.toList());
+            
+            // Obtener conteo de especialidades
+            long totalEspecialidades = especialidadRepository.count();
+            
             model.addAttribute("stats", stats);
-            model.addAttribute("usuarios", todosUsuarios);
-            model.addAttribute("seccion", "usuarios");
+            model.addAttribute("citasStats", citasStats);
+            model.addAttribute("usuariosRecientes", usuariosRecientes);
+            model.addAttribute("totalEspecialidades", totalEspecialidades);
+            model.addAttribute("seccion", null); // null para mostrar el dashboard
             
             return "admin/dashboard";
         } catch (Exception e) {
@@ -83,6 +150,7 @@ public class AdminController {
 
     // Gestión de citas médicas
     @GetMapping("/citas")
+    @Transactional(readOnly = true)
     public String gestionCitas(Model model) {
         try {
             String adminActual = getAuthenticatedUsername();
@@ -90,6 +158,29 @@ public class AdminController {
             
             // Obtener todas las citas
             List<Cita> todasCitas = citaService.obtenerTodasLasCitas();
+            
+            // Inicializar relaciones lazy para evitar LazyInitializationException
+            if (todasCitas != null && !todasCitas.isEmpty()) {
+                for (Cita cita : todasCitas) {
+                    // Inicializar paciente y su usuario
+                    if (cita.getPaciente() != null) {
+                        org.hibernate.Hibernate.initialize(cita.getPaciente());
+                        if (cita.getPaciente().getUsuario() != null) {
+                            org.hibernate.Hibernate.initialize(cita.getPaciente().getUsuario());
+                        }
+                    }
+                    // Inicializar doctor, su usuario y especialidades
+                    if (cita.getDoctor() != null) {
+                        org.hibernate.Hibernate.initialize(cita.getDoctor());
+                        if (cita.getDoctor().getUsuario() != null) {
+                            org.hibernate.Hibernate.initialize(cita.getDoctor().getUsuario());
+                        }
+                        if (cita.getDoctor().getEspecialidades() != null) {
+                            org.hibernate.Hibernate.initialize(cita.getDoctor().getEspecialidades());
+                        }
+                    }
+                }
+            }
             
             // Calcular estadísticas de citas (manejar caso de lista vacía)
             Map<String, Long> citasStats = new HashMap<>();
@@ -169,6 +260,12 @@ public class AdminController {
 
     @GetMapping("/administradores")
     public String administradores(Model model) {
+        // Verificar que solo admins pueden acceder
+        if (!esAdmin()) {
+            model.addAttribute("error", "Acceso denegado. Solo administradores pueden acceder a esta sección.");
+            return "error/error";
+        }
+        
         String adminActual = getAuthenticatedUsername();
         AdminService.AdminStats stats = adminService.obtenerEstadisticas();
         List<Usuario> admins = adminService.obtenerUsuariosPorRol("ADMIN", adminActual);
@@ -176,23 +273,38 @@ public class AdminController {
         admins.addAll(administradores);
         
         model.addAttribute("stats", stats);
-        model.addAttribute("usuarios", admins);
+        model.addAttribute("administradores", admins);
         model.addAttribute("seccion", "administradores");
         
-        return "admin/dashboard";
+        return "admin/administradores";
     }
 
     @GetMapping("/bloqueados")
     public String bloqueados(Model model) {
+        // Verificar que solo admins pueden acceder
+        if (!esAdmin()) {
+            model.addAttribute("error", "Acceso denegado. Solo administradores pueden acceder a esta sección.");
+            return "error/error";
+        }
+        
         String adminActual = getAuthenticatedUsername();
         AdminService.AdminStats stats = adminService.obtenerEstadisticas();
-        List<Usuario> bloqueados = adminService.obtenerUsuariosPorRol("BLOQUEADO", adminActual);
+        
+        // Obtener usuarios bloqueados
+        List<Usuario> usuariosBloqueados = adminService.obtenerUsuariosPorRol("BLOQUEADO", adminActual);
+        
+        // Obtener usuarios activos (no bloqueados) para poder bloquearlos
+        List<Usuario> todosUsuarios = adminService.obtenerTodosLosUsuarios(adminActual);
+        List<Usuario> usuariosActivos = todosUsuarios.stream()
+            .filter(u -> !"BLOQUEADO".equals(u.getRol()))
+            .collect(java.util.stream.Collectors.toList());
         
         model.addAttribute("stats", stats);
-        model.addAttribute("usuarios", bloqueados);
+        model.addAttribute("usuariosBloqueados", usuariosBloqueados);
+        model.addAttribute("usuariosActivos", usuariosActivos);
         model.addAttribute("seccion", "bloqueados");
         
-        return "admin/dashboard";
+        return "admin/bloqueados";
     }
 
     // API endpoints para cambiar roles y estados
@@ -283,6 +395,14 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> cambiarEstadoAjax(@RequestBody Map<String, Object> request) {
         Map<String, Object> response = new HashMap<>();
+        
+        // Verificar que solo admins pueden bloquear/desbloquear
+        if (!esAdmin()) {
+            response.put("success", false);
+            response.put("message", "Acceso denegado. Solo administradores pueden bloquear usuarios.");
+            return ResponseEntity.status(403).body(response);
+        }
+        
         try {
             Long usuarioId = Long.valueOf(request.get("usuarioId").toString());
             Boolean activo = Boolean.valueOf(request.get("activo").toString());

@@ -114,4 +114,9 @@ public class Paciente {
     public String getNombreCompleto() {
         return nombre + " " + apellido;
     }
+
+    // Método helper para obtener email
+    public String getEmail() {
+        return usuario != null ? usuario.getEmail() : null;
+    }
 }

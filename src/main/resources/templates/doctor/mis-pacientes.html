@@ -338,7 +338,11 @@
         <div class="empty-state" th:if="${pacientesConCitas == null or #maps.isEmpty(pacientesConCitas)}">
             <i class="fas fa-heart-broken"></i>
             <p>No tienes pacientes marcados como favoritos</p>
-            <p style="margin-top: 1rem; font-size: 0.9rem;">Ve a Historias Clínicas y marca pacientes con la estrella ⭐</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #6c757d;">
+                <i class="fas fa-info-circle"></i> 
+                Ve a <a th:href="@{/doctor/historias}" style="color: rgb(34, 139, 34); text-decoration: underline;">Historias Clínicas</a> 
+                y marca pacientes con la estrella ⭐ para agregarlos aquí
+            </p>
         </div>
     </div>
 
@@ -352,6 +356,8 @@
             event.stopPropagation();
             
             const pacienteId = button.getAttribute('data-paciente-id');
+            const card = button.closest('.paciente-card');
+            const nombrePaciente = card ? card.querySelector('h3')?.textContent || 'el paciente' : 'el paciente';
             
             fetch(`/doctor/favoritos/toggle/${pacienteId}`, {
                 method: 'POST',
@@ -365,19 +371,72 @@
                 if (data.success) {
                     if (data.esFavorito) {
                         button.classList.add('activo');
+                        mostrarNotificacion('✅ ' + data.message, 'success');
                     } else {
                         button.classList.remove('activo');
+                        mostrarNotificacion('ℹ️ ' + data.message + '<br>El paciente se ha eliminado de favoritos', 'info');
+                        // Si se eliminó de favoritos, recargar la página después de un momento
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
                     }
                     console.log('✅ ' + data.message);
                 } else {
                     console.error('❌ ' + data.message);
-                    alert(data.message);
+                    mostrarNotificacion('❌ ' + data.message, 'error');
                 }
             })
             .catch(error => {
                 console.error('❌ Error:', error);
-                alert('Error al actualizar favorito');
+                mostrarNotificacion('❌ Error al actualizar favorito', 'error');
             });
+        }
+        
+        function mostrarNotificacion(mensaje, tipo) {
+            // Crear elemento de notificación
+            const notificacion = document.createElement('div');
+            notificacion.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${tipo === 'success' ? '#28a745' : tipo === 'error' ? '#dc3545' : '#17a2b8'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                max-width: 400px;
+                font-size: 0.95rem;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notificacion.innerHTML = mensaje;
+            
+            // Agregar animación
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notificacion);
+            
+            // Remover después de 4 segundos
+            setTimeout(() => {
+                notificacion.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => {
+                    notificacion.remove();
+                    style.remove();
+                }, 300);
+            }, 4000);
         }
         
         function filtrarPacientes() {
