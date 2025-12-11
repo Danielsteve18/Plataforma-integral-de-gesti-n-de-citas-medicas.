@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,7 +51,7 @@
             padding: 2rem;
             border-radius: 15px;
             margin-bottom: 2rem;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
             display: flex;
             align-items: center;
             gap: 1.5rem;
@@ -83,7 +84,7 @@
             background: white;
             border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
         }
 
         .tabs {
@@ -148,7 +149,7 @@
 
         .item-card:hover {
             transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .item-card.rechazada {
@@ -194,10 +195,25 @@
             display: inline-block;
         }
 
-        .estado-badge.confirmada { background: #d4edda; color: #155724; }
-        .estado-badge.completada { background: #d1ecf1; color: #0c5460; }
-        .estado-badge.cancelada { background: #f8d7da; color: #721c24; }
-        .estado-badge.programada { background: #fff3cd; color: #856404; }
+        .estado-badge.confirmada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .estado-badge.completada {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .estado-badge.cancelada {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .estado-badge.programada {
+            background: #fff3cd;
+            color: #856404;
+        }
 
         .empty-message {
             text-align: center;
@@ -251,19 +267,19 @@
     </style>
     <script type="text/javascript">
         // Definir función globalmente ANTES de que se cargue el DOM
-        window.openTab = function(evt, tabName) {
+        window.openTab = function (evt, tabName) {
             console.log('🔄 Cambiando a tab:', tabName);
-            
+
             var tabContents = document.querySelectorAll('.tab-content');
             console.log('📋 Tabs encontrados:', tabContents.length);
-            tabContents.forEach(function(content) {
+            tabContents.forEach(function (content) {
                 console.log('  - ID:', content.id);
                 content.classList.remove('active');
                 content.style.display = 'none';
             });
 
             var tabs = document.querySelectorAll('.tab');
-            tabs.forEach(function(tab) {
+            tabs.forEach(function (tab) {
                 tab.classList.remove('active');
             });
 
@@ -276,17 +292,17 @@
             } else {
                 console.error('❌ No se encontró el tab:', tabName);
                 console.log('📝 IDs disponibles en el documento:');
-                document.querySelectorAll('[id]').forEach(function(el) {
+                document.querySelectorAll('[id]').forEach(function (el) {
                     console.log('  -', el.id);
                 });
             }
-            
+
             if (evt && evt.currentTarget) {
                 evt.currentTarget.classList.add('active');
             }
         };
-        
-        document.addEventListener('DOMContentLoaded', function() {
+
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('📄 Página cargada, activando primer tab');
             var firstTab = document.getElementById('historias');
             if (firstTab) {
@@ -296,6 +312,7 @@
         });
     </script>
 </head>
+
 <body>
     <div class="container">
         <a th:href="@{/doctor/historias}" class="back-btn">
@@ -309,23 +326,39 @@
             </div>
             <div class="paciente-info">
                 <h1 th:text="${paciente.nombre + ' ' + paciente.apellido}">Nombre del Paciente</h1>
-                <p><i class="fas fa-envelope"></i> <span th:text="${paciente.usuario.email}">email@example.com</span></p>
-                <p th:if="${paciente.telefono}"><i class="fas fa-phone"></i> <span th:text="${paciente.telefono}">Teléfono</span></p>
-                <p th:if="${paciente.fechaNacimiento}"><i class="fas fa-birthday-cake"></i> <span th:text="${#temporals.format(paciente.fechaNacimiento, 'dd/MM/yyyy')}">Fecha de Nacimiento</span></p>
+                <p><i class="fas fa-envelope"></i> <span th:text="${paciente.usuario.email}">email@example.com</span>
+                </p>
+                <p th:if="${paciente.telefono}"><i class="fas fa-phone"></i> <span
+                        th:text="${paciente.telefono}">Teléfono</span></p>
+                <p th:if="${paciente.fechaNacimiento}"><i class="fas fa-birthday-cake"></i> <span
+                        th:text="${#temporals.format(paciente.fechaNacimiento, 'dd/MM/yyyy')}">Fecha de
+                        Nacimiento</span></p>
             </div>
+        </div>
+
+        <!-- Botón de Reporte PDF -->
+        <div style="margin-bottom: 1.5rem; text-align: right;">
+            <a th:href="@{/api/reportes/doctor/historia-clinica/{id}(id=${paciente.usuarioId})}"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: linear-gradient(135deg, #dc3545, #c82333); color: white !important; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);"
+                download>
+                <i class="fas fa-file-pdf"></i> Generar Reporte PDF
+            </a>
         </div>
 
         <!-- Tabs -->
         <div class="tabs-container">
             <div class="tabs">
                 <button class="tab active" onclick="openTab(event, 'historias')">
-                    <i class="fas fa-file-medical"></i> Historias Clínicas (<span th:text="${historias != null ? historias.size() : 0}">0</span>)
+                    <i class="fas fa-file-medical"></i> Historias Clínicas (<span
+                        th:text="${historias != null ? historias.size() : 0}">0</span>)
                 </button>
                 <button class="tab" onclick="openTab(event, 'aceptadas')">
-                    <i class="fas fa-check-circle"></i> Citas Aceptadas (<span th:text="${citasAceptadas != null ? citasAceptadas.size() : 0}">0</span>)
+                    <i class="fas fa-check-circle"></i> Citas Aceptadas (<span
+                        th:text="${citasAceptadas != null ? citasAceptadas.size() : 0}">0</span>)
                 </button>
                 <button class="tab" onclick="openTab(event, 'rechazadas')">
-                    <i class="fas fa-times-circle"></i> Citas Rechazadas (<span th:text="${citasRechazadas != null ? citasRechazadas.size() : 0}">0</span>)
+                    <i class="fas fa-times-circle"></i> Citas Rechazadas (<span
+                        th:text="${citasRechazadas != null ? citasRechazadas.size() : 0}">0</span>)
                 </button>
             </div>
 
@@ -337,18 +370,19 @@
                             <div>
                                 <div class="item-title">Historia Clínica</div>
                                 <div class="item-date">
-                                    <i class="fas fa-calendar"></i> 
-                                    <span th:text="${#temporals.format(historia.fechaCreacion, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                                    <i class="fas fa-calendar"></i>
+                                    <span
+                                        th:text="${#temporals.format(historia.fechaCreacion, 'dd/MM/yyyy HH:mm')}">Fecha</span>
                                 </div>
                             </div>
                         </div>
                         <div class="item-body">
                             <strong><i class="fas fa-stethoscope"></i> Diagnóstico:</strong>
                             <p th:text="${historia.diagnostico}">Diagnóstico</p>
-                            
+
                             <strong><i class="fas fa-pills"></i> Prescripción:</strong>
                             <p th:text="${historia.prescripcion}">Prescripción</p>
-                            
+
                             <strong th:if="${historia.notas}"><i class="fas fa-notes-medical"></i> Notas:</strong>
                             <p th:if="${historia.notas}" th:text="${historia.notas}">Notas adicionales</p>
                         </div>
@@ -368,15 +402,14 @@
                             <div>
                                 <div class="item-title" th:text="${cita.motivo}">Motivo de la cita</div>
                                 <div class="item-date">
-                                    <i class="fas fa-calendar"></i> 
+                                    <i class="fas fa-calendar"></i>
                                     <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">Fecha</span>
                                     <i class="fas fa-clock" style="margin-left: 1rem;"></i>
                                     <span th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">Hora</span>
                                 </div>
                             </div>
-                            <span class="estado-badge" 
-                                  th:classappend="${#strings.toLowerCase(cita.estado)}"
-                                  th:text="${cita.estado}">Estado</span>
+                            <span class="estado-badge" th:classappend="${#strings.toLowerCase(cita.estado)}"
+                                th:text="${cita.estado}">Estado</span>
                         </div>
                         <div class="item-body" th:if="${cita.notasCancelacion}">
                             <strong><i class="fas fa-comment"></i> Notas:</strong>
@@ -398,7 +431,7 @@
                             <div>
                                 <div class="item-title" th:text="${cita.motivo}">Motivo de la cita</div>
                                 <div class="item-date">
-                                    <i class="fas fa-calendar"></i> 
+                                    <i class="fas fa-calendar"></i>
                                     <span th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">Fecha</span>
                                     <i class="fas fa-clock" style="margin-left: 1rem;"></i>
                                     <span th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">Hora</span>
@@ -420,4 +453,5 @@
         </div>
     </div>
 </body>
+
 </html>

@@ -35,3 +35,6 @@ ON DUPLICATE KEY UPDATE nombre=nombre;
 -- Verificar las especialidades insertadas
 SELECT COUNT(*) as total_especialidades FROM especialidades;
 SELECT * FROM especialidades ORDER BY nombre;
+
+
+

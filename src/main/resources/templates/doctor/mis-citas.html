@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Mi Agenda - MediPac</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -33,7 +34,7 @@
             padding: 2rem;
             border-radius: 15px;
             border: 1px solid rgba(34, 139, 34, 0.2);
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
         }
 
         .agenda-header h1 {
@@ -81,7 +82,7 @@
             border-radius: 12px;
             text-align: center;
             border-left: 4px solid;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s ease;
         }
 
@@ -89,10 +90,21 @@
             transform: translateY(-5px);
         }
 
-        .stat-card.pendientes { border-color: #ffc107; }
-        .stat-card.confirmadas { border-color: rgb(34, 139, 34); }
-        .stat-card.completadas { border-color: #17a2b8; }
-        .stat-card.canceladas { border-color: #dc3545; }
+        .stat-card.pendientes {
+            border-color: #ffc107;
+        }
+
+        .stat-card.confirmadas {
+            border-color: rgb(34, 139, 34);
+        }
+
+        .stat-card.completadas {
+            border-color: #17a2b8;
+        }
+
+        .stat-card.canceladas {
+            border-color: #dc3545;
+        }
 
         .stat-number {
             font-size: 2.5rem;
@@ -100,10 +112,21 @@
             margin: 0.5rem 0;
         }
 
-        .stat-card.pendientes .stat-number { color: #ffc107; }
-        .stat-card.confirmadas .stat-number { color: rgb(34, 139, 34); }
-        .stat-card.completadas .stat-number { color: #17a2b8; }
-        .stat-card.canceladas .stat-number { color: #dc3545; }
+        .stat-card.pendientes .stat-number {
+            color: #ffc107;
+        }
+
+        .stat-card.confirmadas .stat-number {
+            color: rgb(34, 139, 34);
+        }
+
+        .stat-card.completadas .stat-number {
+            color: #17a2b8;
+        }
+
+        .stat-card.canceladas .stat-number {
+            color: #dc3545;
+        }
 
         .stat-label {
             color: #6c757d !important;
@@ -121,7 +144,7 @@
             gap: 1rem;
             flex-wrap: wrap;
             align-items: end;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .filter-group {
@@ -204,10 +227,25 @@
             display: inline-block;
         }
 
-        .estado-badge.estado-programada { background: #fff3cd; color: #856404; }
-        .estado-badge.estado-confirmada { background: #d4edda; color: #155724; }
-        .estado-badge.estado-completada { background: #d1ecf1; color: #0c5460; }
-        .estado-badge.estado-cancelada { background: #f8d7da; color: #721c24; }
+        .estado-badge.estado-programada {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .estado-badge.estado-confirmada {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .estado-badge.estado-completada {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .estado-badge.estado-cancelada {
+            background: #f8d7da;
+            color: #721c24;
+        }
 
         .action-btns {
             display: flex;
@@ -333,6 +371,7 @@
                 transform: translateY(-50px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -413,7 +452,7 @@
             padding: 3rem;
             background: white !important;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .empty-state i {
@@ -469,7 +508,8 @@
                 font-size: 0.85rem;
             }
 
-            th, td {
+            th,
+            td {
                 padding: 0.75rem 0.5rem;
             }
 
@@ -479,6 +519,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="agenda-container">
         <a th:href="@{/doctor/dashboard}" class="back-btn">
@@ -536,6 +577,14 @@
             </div>
         </div>
 
+        <!-- Botón Exportar Agenda -->
+        <div style="margin-bottom: 1.5rem; text-align: right;">
+            <button onclick="exportarAgenda()"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50)); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(34, 139, 34, 0.3);">
+                <i class="fas fa-download"></i> Exportar Agenda a PDF
+            </button>
+        </div>
+
         <!-- Tabla de citas -->
         <div class="citas-table" th:if="${citas != null and not #lists.isEmpty(citas)}">
             <table>
@@ -550,11 +599,13 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="cita : ${citas}" th:attr="data-estado=${cita.estado}, data-fecha=${#temporals.format(cita.fechaHora, 'yyyy-MM-dd')}">
+                    <tr th:each="cita : ${citas}"
+                        th:attr="data-estado=${cita.estado}, data-fecha=${#temporals.format(cita.fechaHora, 'yyyy-MM-dd')}">
                         <td th:text="${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')}">Fecha</td>
                         <td th:text="${#temporals.format(cita.fechaHora, 'HH:mm')}">Hora</td>
                         <td>
-                            <strong th:text="${cita.paciente.nombre} + ' ' + ${cita.paciente.apellido}">Paciente</strong><br>
+                            <strong
+                                th:text="${cita.paciente.nombre} + ' ' + ${cita.paciente.apellido}">Paciente</strong><br>
                             <small th:text="${cita.paciente.usuario.email}" style="color: #6c757d;">email</small>
                         </td>
                         <td>
@@ -563,23 +614,21 @@
                             </div>
                         </td>
                         <td>
-                            <span class="estado-badge" 
-                                  th:classappend="'estado-' + ${#strings.toLowerCase(cita.estado)}"
-                                  th:text="${cita.estado}">ESTADO</span>
+                            <span class="estado-badge" th:classappend="'estado-' + ${#strings.toLowerCase(cita.estado)}"
+                                th:text="${cita.estado}">ESTADO</span>
                         </td>
                         <td>
                             <div class="action-btns">
                                 <!-- Solo botón Ver Detalles - Las acciones están dentro del modal -->
                                 <button type="button" class="btn-icon btn-detalle" data-tooltip="Ver Detalles"
-                                        th:attr="data-cita-id=${cita.id},
+                                    th:attr="data-cita-id=${cita.id},
                                                  data-paciente=${cita.paciente.nombre + ' ' + cita.paciente.apellido},
                                                  data-fecha=${#temporals.format(cita.fechaHora, 'dd/MM/yyyy')},
                                                  data-hora=${#temporals.format(cita.fechaHora, 'HH:mm')},
                                                  data-motivo=${cita.motivo},
                                                  data-estado=${cita.estado},
                                                  data-email=${cita.paciente.usuario.email},
-                                                 data-telefono=${cita.paciente.telefono != null ? cita.paciente.telefono : 'No registrado'}"
-                                        onclick="verDetalleFromButton(this)">
+                                                 data-telefono=${cita.paciente.telefono != null ? cita.paciente.telefono : 'No registrado'}" onclick="verDetalleFromButton(this)">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -657,31 +706,32 @@
                 </div>
 
                 <!-- Botones de acción dentro del modal -->
-                <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <div
+                    style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #f0f0f0; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                     <input type="hidden" id="detalle-cita-id" value="">
                     <input type="hidden" id="detalle-cita-estado" value="">
-                    
+
                     <!-- Botón Aceptar (solo si está PROGRAMADA) -->
-                    <button id="btn-modal-aceptar" type="button" 
-                            style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50)); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(34, 139, 34, 0.3);"
-                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(34, 139, 34, 0.4)'"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(34, 139, 34, 0.3)'">
+                    <button id="btn-modal-aceptar" type="button"
+                        style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, rgb(34, 139, 34), rgb(50, 160, 50)); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(34, 139, 34, 0.3);"
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(34, 139, 34, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(34, 139, 34, 0.3)'">
                         <i class="fas fa-check-circle"></i> Aceptar Cita
                     </button>
 
                     <!-- Botón Completar (solo si está CONFIRMADA) -->
                     <button id="btn-modal-completar" type="button"
-                            style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, #17a2b8, #138496); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(23, 162, 184, 0.3);"
-                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(23, 162, 184, 0.4)'"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(23, 162, 184, 0.3)'">
+                        style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, #17a2b8, #138496); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(23, 162, 184, 0.3);"
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(23, 162, 184, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(23, 162, 184, 0.3)'">
                         <i class="fas fa-check-double"></i> Completar Cita
                     </button>
 
                     <!-- Botón Rechazar (solo si está PROGRAMADA o CONFIRMADA) -->
                     <button id="btn-modal-rechazar" type="button"
-                            style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);"
-                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(220, 53, 69, 0.4)'"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(220, 53, 69, 0.3)'">
+                        style="display: none; padding: 1rem 2rem; background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 1.05rem; transition: all 0.3s; box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);"
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 15px rgba(220, 53, 69, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(220, 53, 69, 0.3)'">
                         <i class="fas fa-times-circle"></i> Rechazar Cita
                     </button>
                 </div>
@@ -695,13 +745,13 @@
             const fechaHasta = document.getElementById('fechaHasta').value;
 
             const filas = document.querySelectorAll('tbody tr');
-            
+
             filas.forEach(fila => {
                 let mostrar = true;
 
                 // Filtrar por fecha
                 const fechaCita = fila.dataset.fecha;
-                
+
                 if (fechaDesde && fechaCita < fechaDesde) {
                     mostrar = false;
                 }
@@ -723,7 +773,7 @@
             const email = button.getAttribute('data-email');
             const telefono = button.getAttribute('data-telefono');
             const citaId = button.getAttribute('data-cita-id');
-            
+
             verDetalle(citaId, paciente, fecha, hora, motivo, estado, email, telefono);
         }
 
@@ -731,11 +781,11 @@
             console.log('=== INICIO verDetalle ===');
             console.log('Estado de la cita:', estado);
             console.log('Tipo de estado:', typeof estado);
-            
+
             // Normalizar el estado a mayúsculas para la comparación
             const estadoNormalizado = estado.toUpperCase();
             console.log('Estado normalizado:', estadoNormalizado);
-            
+
             // Llenar los datos del modal
             document.getElementById('detalle-paciente').textContent = paciente;
             document.getElementById('detalle-email').textContent = email;
@@ -745,29 +795,29 @@
             document.getElementById('detalle-motivo').textContent = motivo;
             document.getElementById('detalle-cita-id').value = citaId;
             document.getElementById('detalle-cita-estado').value = estado;
-            
+
             // Badge de estado
             const badge = document.getElementById('detalle-estado-badge');
             badge.textContent = estado;
             badge.className = 'estado-badge estado-' + estado.toLowerCase();
-            
+
             // Ocultar todos los botones primero
             const btnAceptar = document.getElementById('btn-modal-aceptar');
             const btnCompletar = document.getElementById('btn-modal-completar');
             const btnRechazar = document.getElementById('btn-modal-rechazar');
-            
+
             console.log('Botón Aceptar encontrado:', btnAceptar !== null);
             console.log('Botón Completar encontrado:', btnCompletar !== null);
             console.log('Botón Rechazar encontrado:', btnRechazar !== null);
-            
+
             btnAceptar.style.display = 'none';
             btnCompletar.style.display = 'none';
             btnRechazar.style.display = 'none';
-            
+
             console.log('Verificando estado para mostrar botones:', estadoNormalizado);
             console.log('¿Es PROGRAMADA?', estadoNormalizado === 'PROGRAMADA');
             console.log('¿Es CONFIRMADA?', estadoNormalizado === 'CONFIRMADA');
-            
+
             // Mostrar botones según el estado (usando estadoNormalizado)
             if (estadoNormalizado === 'PROGRAMADA') {
                 console.log('✅ Mostrando botones ACEPTAR y RECHAZAR para PROGRAMADA');
@@ -782,65 +832,65 @@
             } else {
                 console.log('ℹ️ Estado no requiere botones de acción:', estadoNormalizado);
             }
-            
+
             console.log('=== FIN verDetalle ===');
-            
+
             // Mostrar modal
             document.getElementById('modalDetalle').classList.add('active');
         }
 
         // Función para aceptar cita desde el modal (confirmarla)
-        document.getElementById('btn-modal-aceptar').addEventListener('click', function() {
+        document.getElementById('btn-modal-aceptar').addEventListener('click', function () {
             const citaId = document.getElementById('detalle-cita-id').value;
             if (confirm('¿Aceptar esta cita? La cita será confirmada.')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/doctor/cita/' + citaId + '/confirmar';
-                
+
                 const csrf = document.createElement('input');
                 csrf.type = 'hidden';
                 csrf.name = '_csrf';
                 csrf.value = document.querySelector('meta[name="_csrf"]').getAttribute('content');
                 form.appendChild(csrf);
-                
+
                 document.body.appendChild(form);
                 form.submit();
             }
         });
 
         // Función para completar cita desde el modal
-        document.getElementById('btn-modal-completar').addEventListener('click', function() {
+        document.getElementById('btn-modal-completar').addEventListener('click', function () {
             const citaId = document.getElementById('detalle-cita-id').value;
             if (confirm('¿Marcar esta cita como completada?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/doctor/cita/' + citaId + '/completar';
-                
+
                 const csrf = document.createElement('input');
                 csrf.type = 'hidden';
                 csrf.name = '_csrf';
                 csrf.value = document.querySelector('meta[name="_csrf"]').getAttribute('content');
                 form.appendChild(csrf);
-                
+
                 document.body.appendChild(form);
                 form.submit();
             }
         });
 
         // Función para rechazar cita desde el modal (cancelarla)
-        document.getElementById('btn-modal-rechazar').addEventListener('click', function() {
+        document.getElementById('btn-modal-rechazar').addEventListener('click', function () {
             const citaId = document.getElementById('detalle-cita-id').value;
             if (confirm('¿Está seguro de rechazar esta cita? Esta acción cancelará la cita.')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/doctor/cita/' + citaId + '/cancelar';
-                
+
                 const csrf = document.createElement('input');
                 csrf.type = 'hidden';
                 csrf.name = '_csrf';
                 csrf.value = document.querySelector('meta[name="_csrf"]').getAttribute('content');
                 form.appendChild(csrf);
-                
+
                 document.body.appendChild(form);
                 form.submit();
             }
@@ -851,18 +901,31 @@
         }
 
         // Cerrar modal al hacer clic fuera
-        document.getElementById('modalDetalle').addEventListener('click', function(e) {
+        document.getElementById('modalDetalle').addEventListener('click', function (e) {
             if (e.target === this) {
                 cerrarModal();
             }
         });
 
         // Cerrar modal con tecla ESC
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 cerrarModal();
             }
         });
+
+        // Función para exportar agenda a PDF
+        function exportarAgenda() {
+            const fechaDesde = document.getElementById('fechaDesde').value;
+            const fechaHasta = document.getElementById('fechaHasta').value;
+
+            let url = '/api/reportes/doctor/agenda?';
+            if (fechaDesde) url += 'fechaInicio=' + fechaDesde + '&';
+            if (fechaHasta) url += 'fechaFin=' + fechaHasta;
+
+            window.open(url, '_blank');
+        }
     </script>
 </body>
+
 </html>

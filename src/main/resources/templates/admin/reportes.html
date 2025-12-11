@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title>Reportes - Admin - MediPac</title>
+    <link rel="stylesheet" th:href="@{/admin/admin.css}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .reports-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 1rem;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .report-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .report-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .report-title {
+            font-size: 1.5rem;
+            color: #343a40;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .report-description {
+            color: #6c757d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .report-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .report-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .report-btn i {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-content">
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="admin-title">
+                <i class="fas fa-file-alt"></i>
+                Panel de Reportes
+            </h1>
+            <div class="header-actions">
+                <span class="admin-user">Administrador</span>
+                <form action="/logout" method="post" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="logout-btn"
+                        style="background: none; border: none; cursor: pointer; color: inherit; font: inherit;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <!-- Dashboard -->
+            <div class="sidebar-section">
+                <a href="/admin/dashboard" class="sidebar-item">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Gestión de Citas -->
+            <div class="sidebar-section">
+                <a href="/admin/citas" class="sidebar-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Citas Médicas</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Gestión de Usuarios -->
+            <div class="sidebar-section">
+                <a href="/admin/usuarios" class="sidebar-item">
+                    <i class="fas fa-users"></i>
+                    <span>Todos los Usuarios</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Pacientes -->
+            <div class="sidebar-section">
+                <a href="/admin/pacientes" class="sidebar-item">
+                    <i class="fas fa-user-injured"></i>
+                    <span>Pacientes</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Doctores -->
+            <div class="sidebar-section">
+                <a href="/admin/doctores" class="sidebar-item">
+                    <i class="fas fa-user-md"></i>
+                    <span>Doctores</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Administradores -->
+            <div class="sidebar-section">
+                <a href="/admin/administradores" class="sidebar-item">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Administradores</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Usuarios Bloqueados -->
+            <div class="sidebar-section">
+                <a href="/admin/bloqueados" class="sidebar-item">
+                    <i class="fas fa-ban"></i>
+                    <span>Usuarios Bloqueados</span>
+                </a>
+            </div>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Reportes (Actual) -->
+            <div class="sidebar-section">
+                <a href="/admin/reportes" class="sidebar-item active">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reportes</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="content-container">
+            <div style="margin-bottom: 2rem;">
+                <h2 style="color: #343a40; margin-bottom: 0.5rem;">Generación de Reportes</h2>
+                <p style="color: #6c757d;">Descarga reportes detallados en formato PDF del estado actual del sistema.
+                </p>
+            </div>
+
+            <div class="reports-container">
+                <!-- Reporte de Usuarios -->
+                <div class="report-card">
+                    <i class="fas fa-users report-icon"></i>
+                    <h3 class="report-title">Listado de Usuarios</h3>
+                    <p class="report-description">Genera un reporte completo con la información de todos los usuarios
+                        registrados en el sistema, incluyendo contacto y estado.</p>
+                    <a th:href="@{/api/reportes/admin/pacientes}" target="_blank" class="report-btn">
+                        <i class="fas fa-download"></i> Descargar PDF
+                    </a>
+                </div>
+
+                <!-- Reporte de Doctores -->
+                <div class="report-card">
+                    <i class="fas fa-user-md report-icon"></i>
+                    <h3 class="report-title">Listado de Doctores</h3>
+                    <p class="report-description">Obtén un listado detallado de todo el cuerpo médico, incluyendo sus
+                        especialidades, número de licencia y datos de contacto.</p>
+                    <a th:href="@{/api/reportes/admin/doctores}" target="_blank" class="report-btn">
+                        <i class="fas fa-download"></i> Descargar PDF
+                    </a>
+                </div>
+
+                <!-- Reporte de Estadísticas -->
+                <!-- 
+                <div class="report-card">
+                    <i class="fas fa-chart-pie report-icon"></i>
+                    <h3 class="report-title">Resumen Estadístico</h3>
+                    <p class="report-description">Reporte ejecutivo con estadísticas clave del sistema: citas por estado, usuarios por rol y métricas de desempeño.</p>
+                    <a th:href="@{/api/reportes/admin/estadisticas}" target="_blank" class="report-btn">
+                        <i class="fas fa-download"></i> Descargar PDF
+                    </a>
+                </div>
+                -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Toggle sidebar
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        });
+
+        // Auto-collapse sidebar en móviles
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('expanded');
+        }
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('expanded');
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+            }
+        });
+    </script>
+</body>
+
+</html>

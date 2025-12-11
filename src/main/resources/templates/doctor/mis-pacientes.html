@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Mis Pacientes - MediPac</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -33,7 +34,7 @@
             padding: 2rem;
             border-radius: 15px;
             border: 1px solid rgba(34, 139, 34, 0.2);
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
         }
 
         .historias-header h1 {
@@ -77,7 +78,7 @@
             gap: 1rem;
             flex-wrap: wrap;
             align-items: end;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .filter-group {
@@ -123,7 +124,7 @@
             background: white !important;
             border-radius: 12px;
             padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             border-left: 4px solid rgb(34, 139, 34);
             transition: all 0.3s ease;
             cursor: pointer;
@@ -137,7 +138,7 @@
             transform: translateY(-5px);
             box-shadow: 0 6px 20px rgba(34, 139, 34, 0.15);
         }
-        
+
         .favorito-btn {
             position: absolute;
             top: 1rem;
@@ -149,19 +150,19 @@
             transition: all 0.3s ease;
             z-index: 10;
         }
-        
+
         .favorito-btn:hover {
             transform: scale(1.2);
         }
-        
+
         .favorito-btn.activo {
             color: #FFD700;
         }
-        
+
         .favorito-btn:not(.activo) {
             color: #ddd;
         }
-        
+
         .favorito-btn:not(.activo):hover {
             color: #FFD700;
         }
@@ -215,9 +216,17 @@
             margin-bottom: 0.2rem;
         }
 
-        .stat-value.total { color: rgb(34, 139, 34); }
-        .stat-value.aceptadas { color: #28a745; }
-        .stat-value.rechazadas { color: #dc3545; }
+        .stat-value.total {
+            color: rgb(34, 139, 34);
+        }
+
+        .stat-value.aceptadas {
+            color: #28a745;
+        }
+
+        .stat-value.rechazadas {
+            color: #dc3545;
+        }
 
         .stat-label {
             font-size: 0.8rem;
@@ -230,7 +239,7 @@
             padding: 3rem;
             background: white !important;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .empty-state i {
@@ -263,6 +272,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="historias-container">
         <a th:href="@{/doctor/dashboard}" class="back-btn">
@@ -294,18 +304,23 @@
             </div>
         </div>
 
+        <!-- Botón Exportar Lista de Pacientes -->
+        <div style="margin-bottom: 1.5rem; text-align: right;">
+            <a href="/api/reportes/doctor/pacientes"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1.5rem; background: linear-gradient(135deg, #17a2b8, #138496); color: white !important; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);"
+                download>
+                <i class="fas fa-file-pdf"></i> Exportar Lista de Pacientes
+            </a>
+        </div>
+
         <!-- Grid de Pacientes -->
         <div class="pacientes-grid" th:if="${pacientesConCitas != null and not #maps.isEmpty(pacientesConCitas)}">
-            <a th:each="entry : ${pacientesConCitas}" 
-               th:href="@{/doctor/historias/paciente/{id}(id=${entry.key.usuarioId})}"
-               class="paciente-card"
-               th:attr="data-aceptadas=${entry.value.citasAceptadas.size()},
+            <a th:each="entry : ${pacientesConCitas}"
+                th:href="@{/doctor/historias/paciente/{id}(id=${entry.key.usuarioId})}" class="paciente-card" th:attr="data-aceptadas=${entry.value.citasAceptadas.size()},
                         data-rechazadas=${entry.value.citasRechazadas.size()},
                         data-paciente-id=${entry.key.usuarioId}">
-                <button class="favorito-btn" 
-                        th:classappend="${entry.value.esFavorito} ? 'activo' : ''"
-                        th:attr="data-paciente-id=${entry.key.usuarioId}"
-                        onclick="toggleFavorito(event, this)">
+                <button class="favorito-btn" th:classappend="${entry.value.esFavorito} ? 'activo' : ''"
+                    th:attr="data-paciente-id=${entry.key.usuarioId}" onclick="toggleFavorito(event, this)">
                     <i class="fas fa-star"></i>
                 </button>
                 <div class="paciente-info">
@@ -314,8 +329,10 @@
                     </div>
                     <div class="paciente-datos">
                         <h3 th:text="${entry.key.nombre + ' ' + entry.key.apellido}">Nombre Paciente</h3>
-                        <p><i class="fas fa-envelope"></i> <span th:text="${entry.key.usuario.email}">email@example.com</span></p>
-                        <p th:if="${entry.key.telefono}"><i class="fas fa-phone"></i> <span th:text="${entry.key.telefono}">Teléfono</span></p>
+                        <p><i class="fas fa-envelope"></i> <span
+                                th:text="${entry.key.usuario.email}">email@example.com</span></p>
+                        <p th:if="${entry.key.telefono}"><i class="fas fa-phone"></i> <span
+                                th:text="${entry.key.telefono}">Teléfono</span></p>
                     </div>
                 </div>
                 <div class="paciente-stats">
@@ -339,8 +356,9 @@
             <i class="fas fa-heart-broken"></i>
             <p>No tienes pacientes marcados como favoritos</p>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #6c757d;">
-                <i class="fas fa-info-circle"></i> 
-                Ve a <a th:href="@{/doctor/historias}" style="color: rgb(34, 139, 34); text-decoration: underline;">Historias Clínicas</a> 
+                <i class="fas fa-info-circle"></i>
+                Ve a <a th:href="@{/doctor/historias}"
+                    style="color: rgb(34, 139, 34); text-decoration: underline;">Historias Clínicas</a>
                 y marca pacientes con la estrella ⭐ para agregarlos aquí
             </p>
         </div>
@@ -350,15 +368,15 @@
         // Obtener el token CSRF
         const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
-        
+
         function toggleFavorito(event, button) {
             event.preventDefault();
             event.stopPropagation();
-            
+
             const pacienteId = button.getAttribute('data-paciente-id');
             const card = button.closest('.paciente-card');
             const nombrePaciente = card ? card.querySelector('h3')?.textContent || 'el paciente' : 'el paciente';
-            
+
             fetch(`/doctor/favoritos/toggle/${pacienteId}`, {
                 method: 'POST',
                 headers: {
@@ -366,32 +384,32 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (data.esFavorito) {
-                        button.classList.add('activo');
-                        mostrarNotificacion('✅ ' + data.message, 'success');
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.esFavorito) {
+                            button.classList.add('activo');
+                            mostrarNotificacion('✅ ' + data.message, 'success');
+                        } else {
+                            button.classList.remove('activo');
+                            mostrarNotificacion('ℹ️ ' + data.message + '<br>El paciente se ha eliminado de favoritos', 'info');
+                            // Si se eliminó de favoritos, recargar la página después de un momento
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        }
+                        console.log('✅ ' + data.message);
                     } else {
-                        button.classList.remove('activo');
-                        mostrarNotificacion('ℹ️ ' + data.message + '<br>El paciente se ha eliminado de favoritos', 'info');
-                        // Si se eliminó de favoritos, recargar la página después de un momento
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
+                        console.error('❌ ' + data.message);
+                        mostrarNotificacion('❌ ' + data.message, 'error');
                     }
-                    console.log('✅ ' + data.message);
-                } else {
-                    console.error('❌ ' + data.message);
-                    mostrarNotificacion('❌ ' + data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('❌ Error:', error);
-                mostrarNotificacion('❌ Error al actualizar favorito', 'error');
-            });
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    mostrarNotificacion('❌ Error al actualizar favorito', 'error');
+                });
         }
-        
+
         function mostrarNotificacion(mensaje, tipo) {
             // Crear elemento de notificación
             const notificacion = document.createElement('div');
@@ -410,7 +428,7 @@
                 animation: slideIn 0.3s ease-out;
             `;
             notificacion.innerHTML = mensaje;
-            
+
             // Agregar animación
             const style = document.createElement('style');
             style.textContent = `
@@ -426,9 +444,9 @@
                 }
             `;
             document.head.appendChild(style);
-            
+
             document.body.appendChild(notificacion);
-            
+
             // Remover después de 4 segundos
             setTimeout(() => {
                 notificacion.style.animation = 'slideIn 0.3s ease-out reverse';
@@ -438,26 +456,27 @@
                 }, 300);
             }, 4000);
         }
-        
+
         function filtrarPacientes() {
             const tipo = document.getElementById('filtroTipo').value;
             const cards = document.querySelectorAll('.paciente-card');
-            
+
             cards.forEach(card => {
                 let mostrar = true;
-                
+
                 const aceptadas = parseInt(card.getAttribute('data-aceptadas'));
                 const rechazadas = parseInt(card.getAttribute('data-rechazadas'));
-                
+
                 if (tipo === 'aceptadas' && aceptadas === 0) {
                     mostrar = false;
                 } else if (tipo === 'rechazadas' && rechazadas === 0) {
                     mostrar = false;
                 }
-                
+
                 card.style.display = mostrar ? 'block' : 'none';
             });
         }
     </script>
 </body>
+
 </html>
