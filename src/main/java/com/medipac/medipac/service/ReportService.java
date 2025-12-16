@@ -249,6 +249,9 @@ public class ReportService {
     /**
      * Genera reporte PDF de TODOS los doctores para el administrador
      */
+    /**
+     * Genera reporte PDF de TODOS los doctores para el administrador
+     */
     @Transactional(readOnly = true)
     public byte[] generarReporteDoctoresAdmin() throws Exception {
         List<Doctor> doctores = doctorRepository.findAll();
@@ -258,20 +261,22 @@ public class ReportService {
         parameters.put("fechaGeneracion", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         parameters.put("totalDoctores", doctores.size());
 
-        List<Map<String, Object>> doctoresDTO = doctores.stream()
+        List<DoctorReporteDTO> doctoresDTO = doctores.stream()
                 .map(d -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("nombre", "Dr. " + d.getNombre() + " " + d.getApellido());
+                    String nombre = "Dr. " + d.getNombre() + " " + d.getApellido();
                     String especialidades = d.getEspecialidades().stream()
                             .map(Especialidad::getNombre)
                             .collect(Collectors.joining(", "));
-                    map.put("especialidad", especialidades.isEmpty() ? "General" : especialidades);
-                    map.put("licencia", d.getNumeroLicencia());
-                    map.put("telefono", d.getTelefono());
-                    map.put("email", d.getUsuario().getEmail());
-                    return map;
+                    String especialidad = especialidades.isEmpty() ? "General" : especialidades;
+
+                    return new DoctorReporteDTO(
+                            nombre,
+                            especialidad,
+                            d.getNumeroLicencia(),
+                            d.getTelefono(),
+                            d.getUsuario().getEmail());
                 })
-                .sorted(Comparator.comparing(m -> (String) m.get("nombre")))
+                .sorted(Comparator.comparing(DoctorReporteDTO::getNombre))
                 .collect(Collectors.toList());
 
         JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(doctoresDTO);
@@ -391,6 +396,42 @@ public class ReportService {
 
         public void setTotalCitas(int totalCitas) {
             this.totalCitas = totalCitas;
+        }
+    }
+
+    public static class DoctorReporteDTO {
+        private String nombre;
+        private String especialidad;
+        private String licencia;
+        private String telefono;
+        private String email;
+
+        public DoctorReporteDTO(String nombre, String especialidad, String licencia, String telefono, String email) {
+            this.nombre = nombre;
+            this.especialidad = especialidad;
+            this.licencia = licencia;
+            this.telefono = telefono;
+            this.email = email;
+        }
+
+        public String getNombre() {
+            return nombre;
+        }
+
+        public String getEspecialidad() {
+            return especialidad;
+        }
+
+        public String getLicencia() {
+            return licencia;
+        }
+
+        public String getTelefono() {
+            return telefono;
+        }
+
+        public String getEmail() {
+            return email;
         }
     }
 }
