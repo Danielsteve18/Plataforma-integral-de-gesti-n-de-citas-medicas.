@@ -103,3 +103,4 @@ Actualmente en **Fase de Desarrollo / MVP**. Se han implementado las funcionalid
 **Daniel Steve**
 - **GitHub**: [Danielsteve18](https://github.com/Danielsteve18)
 - **LinkedIn**: www.linkedin.com/in/daniel-steve-montaño-arboleda-9748a0330
+- **Youtube**: https://youtu.be/M6h4t7qhpZk
